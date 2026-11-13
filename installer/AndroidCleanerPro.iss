@@ -1,5 +1,7 @@
 #define AppName "Android Cleaner Pro"
+#ifndef AppVersion
 #define AppVersion "0.3.0"
+#endif
 #define AppExe "AndroidCleanerPro.exe"
 [Setup]
 AppId={{9F0F41E1-6C38-4C5A-BDC7-2A5E1D9A72C8}
