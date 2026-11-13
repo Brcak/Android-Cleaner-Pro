@@ -6,5 +6,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>AndroidCleanerPro</AssemblyName>
+    <Version Condition="'$(Version)' == ''">0.3.0</Version>
   </PropertyGroup>
 </Project>
