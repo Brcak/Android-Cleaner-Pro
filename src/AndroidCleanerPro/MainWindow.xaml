@@ -1,0 +1,51 @@
+<Window x:Class="AndroidCleanerPro.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Android Cleaner Pro | Technician Edition" Width="1200" Height="760" MinWidth="850" MinHeight="550" Background="#0B1220" Foreground="#E2E8F0" FontFamily="Segoe UI">
+<Window.Resources>
+  <Style TargetType="Button"><Setter Property="Background" Value="#2563EB"/><Setter Property="Foreground" Value="White"/><Setter Property="Padding" Value="15,9"/><Setter Property="Margin" Value="0,0,9,0"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/></Style>
+  <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E2E8F0"/></Style>
+  <Style TargetType="DataGrid"><Setter Property="Background" Value="#111E32"/><Setter Property="Foreground" Value="#E2E8F0"/><Setter Property="RowBackground" Value="#111E32"/><Setter Property="AlternatingRowBackground" Value="#17263B"/><Setter Property="GridLinesVisibility" Value="None"/><Setter Property="BorderThickness" Value="0"/><Setter Property="AutoGenerateColumns" Value="False"/><Setter Property="IsReadOnly" Value="True"/></Style>
+</Window.Resources>
+<Grid>
+  <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+  <Border Background="#111B2C" Grid.Column="0" Padding="20">
+    <StackPanel>
+      <TextBlock Text="◈ ANDROID CLEANER" FontSize="18" FontWeight="Bold" Foreground="#60A5FA" Margin="0,12,0,5"/>
+      <TextBlock Text="PRO • TECHNICIAN EDITION" FontSize="10" Foreground="#94A3B8" Margin="0,0,0,38"/>
+      <TextBlock Text="▣  Device Dashboard" FontSize="15" Margin="0,0,0,22"/>
+      <TextBlock Text="▦  App Inventory" FontSize="15" Margin="0,0,0,22"/>
+      <TextBlock Text="⬡  Security Review" FontSize="15" Margin="0,0,0,22"/>
+      <TextBlock Text="↧  JSON Reports" FontSize="15"/>
+      <TextBlock Text="v0.3 • Native C# / WPF" Foreground="#64748B" VerticalAlignment="Bottom" Margin="0,260,0,0"/>
+    </StackPanel>
+  </Border>
+  <Grid Grid.Column="1" Margin="26,20">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <DockPanel Margin="0,0,0,22">
+      <StackPanel DockPanel.Dock="Left"><TextBlock Text="Device Dashboard" FontSize="27" FontWeight="Bold"/><TextBlock Text="Connect an authorized Android device with USB debugging enabled" Foreground="#94A3B8" Margin="0,7,0,0"/></StackPanel>
+    </DockPanel>
+    <Border Grid.Row="1" Background="#17263B" CornerRadius="12" Padding="18" Margin="0,0,0,18">
+      <StackPanel>
+        <TextBlock Text="CONNECTED DEVICES" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="0,0,0,10"/>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Content="Refresh Devices" Click="Refresh_Click"/>
+          <ComboBox x:Name="DeviceSelector" Height="34" Margin="0,0,12,0" Background="#F8FAFC" Foreground="#0F172A" SelectionChanged="DeviceSelector_SelectionChanged"/>
+        </DockPanel>
+        <TextBlock x:Name="DeviceDetails" Text="No device selected" Foreground="#94A3B8" Margin="0,12,0,0" TextWrapping="Wrap"/>
+      </StackPanel>
+    </Border>
+    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
+      <Button Content="Scan Installed Apps" Click="Scan_Click"/>
+      <Button Content="Uninstall Selected" Background="#B91C1C" Click="Uninstall_Click"/>
+      <Button Content="Export JSON Report" Background="#334155" Click="Export_Click"/>
+    </StackPanel>
+    <DataGrid x:Name="PackagesGrid" Grid.Row="3" AlternationCount="2" SelectionMode="Single">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Package" Binding="{Binding Name}" Width="2*"/>
+        <DataGridTextColumn Header="Installer" Binding="{Binding Installer}" Width="*"/>
+        <DataGridTextColumn Header="Review" Binding="{Binding Risk}" Width="90"/>
+        <DataGridTextColumn Header="Notes" Binding="{Binding Reason}" Width="2*"/>
+      </DataGrid.Columns>
+    </DataGrid>
+    <TextBlock x:Name="StatusText" Grid.Row="4" Foreground="#94A3B8" Margin="0,12,0,0" Text="Ready. Refresh devices to begin." TextWrapping="Wrap"/>
+  </Grid>
+</Grid>
+</Window>
