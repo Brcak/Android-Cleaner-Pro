@@ -15,11 +15,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Publish self-contained Windows app
+      - name: Build portable Windows package with official Google ADB
         shell: pwsh
-        run: ./build-dotnet-windows.ps1
-      - uses: actions/upload-artifact@v4
+        run: ./build-dotnet-windows.ps1 -BundleAdb
+      - name: Upload portable ZIP
+        uses: actions/upload-artifact@v4
         with:
-          name: AndroidCleanerPro-win-x64
-          path: dist/win-x64/
+          name: AndroidCleanerPro-Portable-win-x64
+          path: dist/AndroidCleanerPro-Portable-win-x64.zip
           if-no-files-found: error
