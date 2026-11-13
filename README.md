@@ -1,36 +1,20 @@
-# Android Cleaner Pro v0.2 — technician-only experimental MVP
+# Android Cleaner Pro — native Windows technician suite (C# / .NET 10)
 
-Dark-themed technician-only PySide6 GUI for ADB package inventory, conservative heuristic review, and technician-approved removal. **Not an antivirus product.**
+**New native Windows edition:** C# + WPF, dark technician dashboard, ADB device discovery and connection status, device model/Android version, third-party app inventory, heuristic review flags, individually confirmed package removal, and JSON reports.
 
-## Requirements
-- Windows 10/11, Python 3.10+
-- Google Android SDK Platform Tools (`adb` on PATH)
-- Android phone with developer options and USB debugging enabled, connected and authorized by its owner
+## Get the Windows EXE (no Python required)
+1. Open [Windows .NET Build — GitHub Actions](https://github.com/Brcak/Android-Cleaner-Pro/actions/workflows/windows-dotnet.yml).
+2. Open a **successful** workflow run (or run it manually).
+3. Download the `AndroidCleanerPro-win-x64` artifact and extract it.
+4. Run `AndroidCleanerPro.exe`.
 
-## Run
-```powershell
-py -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python -m android_cleaner.gui
-```
+**ADB is still required.** Download Google's Android SDK Platform Tools and put `adb` on PATH, or copy the full `platform-tools` directory beside the EXE. On the phone, enable USB debugging and approve the computer. Verify with `adb devices -l`. See the [native Windows installation guide](docs/DOTNET_WINDOWS.md).
 
-## Windows EXE build
-Run `build_windows.bat` on Windows. The executable will be under `dist/`.
+## Build with .NET 10 SDK
+On Windows, run `./build-dotnet-windows.ps1` in PowerShell. Output: `dist/win-x64/AndroidCleanerPro.exe`.
 
-## Behavior and safety
-- Enumerates **third-party packages only** (`pm list packages -3 -i`).
-- Review labels are weak package-name/installer heuristics, **not confirmed malware**.
-- Technician-only interface; single-package uninstall requires explicit confirmation.
-- Uninstall uses `pm uninstall --user 0`; it is **not quarantine** and can delete app data.
-- Some platform/vendor namespaces are blocked, but the protected list is incomplete.
-- Requires device owner authorization. No root or bulk uninstall.
-- Reports include device serial and package names; handle as sensitive customer data.
-- No data is uploaded.
+## Safety and status
+This is an **experimental technician tool, not an antivirus product**. Review flags are keyword heuristics and are not confirmed malware. Uninstall is for Android user 0 and can delete customer data; use only with device-owner authorization. JSON reports contain customer device identifiers. No cloud uploads. **The native build has been committed but not yet verified on a Windows PC or physical phone.** The GitHub workflow must pass before a downloadable build is available.
 
-## Roadmap
-Permission audits, device-specific allowlists, signed threat intelligence, consent-based reputation checks, reversible disable where supported, local case management, tests, and a signed installer.
-
-## Full Windows installation and setup
-
-See [Windows Installation & Technician Guide](docs/WINDOWS_INSTALLATION.md) for Python, ADB, USB drivers, phone authorization, GUI launch, EXE build, troubleshooting and safety guidance.
+## Previous Python prototype
+The earlier PySide6 prototype remains under `android_cleaner/` for reference; see [legacy Python installation](docs/WINDOWS_INSTALLATION.md). Python is **not needed** for the native C# app.
