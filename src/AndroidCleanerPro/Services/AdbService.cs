@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.IO.Compression;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace AndroidCleanerPro.Services;
@@ -11,12 +13,32 @@ public record PackageInfo(string Name, string Installer, string Risk, string Rea
 
 public sealed class AdbService
 {
+    private static readonly object ExtractionLock = new();
     private static string AdbPath
     {
         get
         {
             var local = Path.Combine(AppContext.BaseDirectory, "platform-tools", "adb.exe");
-            return File.Exists(local) ? local : "adb";
+            if (File.Exists(local)) return local;
+            var resourceName = "AndroidCleanerPro.PlatformTools.zip";
+            var assembly = typeof(AdbService).Assembly;
+            using var embedded = assembly.GetManifestResourceStream(resourceName);
+            if (embedded is null)
+                throw new InvalidOperationException("Bundled ADB is missing. Download the official portable build.");
+            var version = assembly.ManifestModule.ModuleVersionId.ToString("N");
+            var cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AndroidCleanerPro", "adb", version);
+            var adb = Path.Combine(cache, "platform-tools", "adb.exe");
+            lock (ExtractionLock)
+            {
+                if (File.Exists(adb)) return adb;
+                Directory.CreateDirectory(cache);
+                using var archive = new ZipArchive(embedded, ZipArchiveMode.Read);
+                archive.ExtractToDirectory(cache, overwriteFiles: true);
+                if (!File.Exists(adb))
+                    throw new InvalidOperationException("Bundled ADB extraction failed.");
+            }
+            return adb;
         }
     }
 
