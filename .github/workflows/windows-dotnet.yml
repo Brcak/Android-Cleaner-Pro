@@ -12,8 +12,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
       - name: Compile Windows desktop application
@@ -30,13 +30,13 @@ jobs:
           & $compiler "installer\AndroidCleanerPro.iss"
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed" }
       - name: Upload Windows Setup installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: AndroidCleanerPro-Setup-Windows
           path: dist/Installer/AndroidCleanerPro-Setup.exe
           if-no-files-found: error
       - name: Upload Windows application files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: AndroidCleanerPro-Windows
           path: dist/Windows/
