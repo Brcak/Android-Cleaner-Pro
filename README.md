@@ -1,6 +1,6 @@
-# Android Cleaner Pro v0.1 — experimental MVP
+# Android Cleaner Pro v0.2 — technician-only experimental MVP
 
-Windows-oriented PySide6 GUI for ADB package inventory, conservative heuristic review, and technician-approved removal. **Not an antivirus product.**
+Dark-themed technician-only PySide6 GUI for ADB package inventory, conservative heuristic review, and technician-approved removal. **Not an antivirus product.**
 
 ## Requirements
 - Windows 10/11, Python 3.10+
@@ -21,7 +21,7 @@ Run `build_windows.bat` on Windows. The executable will be under `dist/`.
 ## Behavior and safety
 - Enumerates **third-party packages only** (`pm list packages -3 -i`).
 - Review labels are weak package-name/installer heuristics, **not confirmed malware**.
-- Consumer mode inventories apps only; Technician mode allows single-package uninstall after confirmation.
+- Technician-only interface; single-package uninstall requires explicit confirmation.
 - Uninstall uses `pm uninstall --user 0`; it is **not quarantine** and can delete app data.
 - Some platform/vendor namespaces are blocked, but the protected list is incomplete.
 - Requires device owner authorization. No root or bulk uninstall.
