@@ -30,3 +30,7 @@ Run `build_windows.bat` on Windows. The executable will be under `dist/`.
 
 ## Roadmap
 Permission audits, device-specific allowlists, signed threat intelligence, consent-based reputation checks, reversible disable where supported, local case management, tests, and a signed installer.
+
+## Full Windows installation and setup
+
+See [Windows Installation & Technician Guide](docs/WINDOWS_INSTALLATION.md) for Python, ADB, USB drivers, phone authorization, GUI launch, EXE build, troubleshooting and safety guidance.
