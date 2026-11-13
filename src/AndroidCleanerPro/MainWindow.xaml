@@ -27,19 +27,23 @@
         <TextBlock Text="CONNECTED DEVICES" Foreground="#94A3B8" FontSize="11" FontWeight="Bold" Margin="0,0,0,10"/>
         <DockPanel>
           <Button DockPanel.Dock="Right" Content="Refresh Devices" Click="Refresh_Click"/>
-          <ComboBox x:Name="DeviceSelector" Height="34" Margin="0,0,12,0" Background="#F8FAFC" Foreground="#0F172A" SelectionChanged="DeviceSelector_SelectionChanged"/>
+          <ComboBox x:Name="DeviceSelector" Height="34" Margin="0,0,12,0" Background="#F8FAFC" Foreground="#0F172A" DisplayMemberPath="Description" SelectionChanged="DeviceSelector_SelectionChanged"/>
         </DockPanel>
-        <TextBlock x:Name="DeviceDetails" Text="No device selected" Foreground="#94A3B8" Margin="0,12,0,0" TextWrapping="Wrap"/>
+        <TextBlock x:Name="DeviceDetails" Text="No device selected" Foreground="#E2E8F0" Margin="0,12,0,0" TextWrapping="Wrap"/>
+        <TextBlock x:Name="PhoneInfoText" Text="Connect a phone to view manufacturer, model, Android version, build, battery and storage." Foreground="#94A3B8" Margin="0,7,0,0" TextWrapping="Wrap"/>
       </StackPanel>
     </Border>
     <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
       <Button Content="Scan Installed Apps" Click="Scan_Click"/>
       <Button Content="Uninstall Selected" Background="#B91C1C" Click="Uninstall_Click"/>
       <Button Content="Export JSON Report" Background="#334155" Click="Export_Click"/>
+      <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
+      <Button Content="Reboot Recovery" Background="#7C3AED" Click="Recovery_Click"/>
+      <Button Content="Safe Mode Help" Background="#334155" Click="SafeMode_Click"/>
     </StackPanel>
     <DataGrid x:Name="PackagesGrid" Grid.Row="3" AlternationCount="2" SelectionMode="Single">
       <DataGrid.Columns>
-        <DataGridTextColumn Header="Package" Binding="{Binding Name}" Width="2*"/>
+        <DataGridTextColumn Header="App / Package" Binding="{Binding Name}" Width="2*"/>
         <DataGridTextColumn Header="Installer" Binding="{Binding Installer}" Width="*"/>
         <DataGridTextColumn Header="Review" Binding="{Binding Risk}" Width="90"/>
         <DataGridTextColumn Header="Notes" Binding="{Binding Reason}" Width="2*"/>
