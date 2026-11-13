@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'installer/**'
       - 'build-dotnet-windows.ps1'
       - '.github/workflows/windows-dotnet.yml'
   workflow_dispatch:
@@ -17,9 +18,24 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Compile Windows desktop application
         shell: pwsh
+        run: ./build-dotnet-windows.ps1
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+      - name: Build Setup.exe installer
+        shell: pwsh
         run: |
-          ./build-dotnet-windows.ps1
-      - name: Upload Windows application
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $compiler)) { throw "Inno Setup compiler not found: $compiler" }
+          & $compiler "installer\AndroidCleanerPro.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed" }
+      - name: Upload Windows Setup installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: AndroidCleanerPro-Setup-Windows
+          path: dist/Installer/AndroidCleanerPro-Setup.exe
+          if-no-files-found: error
+      - name: Upload Windows application files
         uses: actions/upload-artifact@v4
         with:
           name: AndroidCleanerPro-Windows
