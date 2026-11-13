@@ -1,25 +1,24 @@
 # Android Cleaner Pro — portable Windows technician suite
 
-Native **C# / .NET 10 WPF** Android repair technician app. Dark dashboard, ADB device discovery, Android model/version, third-party app inventory, conservative heuristic review, single-package owner-authorized removal, and JSON reports.
+Native **C# / .NET 10 WPF** Android repair technician application with dark dashboard, device discovery, Android model/version, third-party app inventory, heuristic review, individual owner-authorized removal, and JSON reports.
 
-## Portable version — no Python or installer
+## One portable EXE — ADB built in
 1. Open [Windows .NET Build](https://github.com/Brcak/Android-Cleaner-Pro/actions/workflows/windows-dotnet.yml).
-2. Select a **successful** run and download the `AndroidCleanerPro-Portable-win-x64` artifact.
-3. Extract the artifact and then the included `AndroidCleanerPro-Portable-win-x64.zip` to a folder or USB stick.
-4. Run `AndroidCleanerPro.exe`.
+2. Select a **successful** run and download `AndroidCleanerPro-Portable-win-x64`.
+3. Extract the artifact and its portable ZIP, then run `AndroidCleanerPro.exe`.
 
-The package bundles the self-contained .NET app and Google's official ADB Platform Tools. Windows USB drivers may still be required; enable USB debugging and approve authorization on the phone. See [portable installation and troubleshooting](docs/DOTNET_WINDOWS.md).
+The build embeds Google's official ADB Platform Tools inside the self-contained Windows EXE. No Python, separate .NET runtime, ADB download, or PATH configuration is needed. The app extracts ADB into a user cache on first use. USB drivers and USB debugging authorization may still be required.
 
-## Build locally
-On Windows with the .NET 10 SDK, run `./build-dotnet-windows.ps1 -BundleAdb`. Output: `dist/AndroidCleanerPro-Portable-win-x64.zip`.
+## Build
+On Windows with .NET 10 SDK, run `./build-dotnet-windows.ps1`. The build fetches official Google Platform Tools, embeds the ZIP, and produces `dist/AndroidCleanerPro-Portable-win-x64.zip`. See [portable setup guide](docs/DOTNET_WINDOWS.md).
 
-## Status and safety
-**Experimental; Windows CI build and physical-device testing not yet verified.** This is not an antivirus product. Package-name heuristics do not establish malware. Uninstall for Android user 0 can delete app data; use only with customer authorization. Exported reports include device identifiers and must be protected. The ZIP is not signed. ADB may create authorization keys in the Windows user profile even when run from USB.
+## Safety and status
+**Experimental; successful Windows CI build and physical phone tests have not yet been verified.** Not an antivirus product. Keyword flags are not malware verdicts. Uninstall can erase app data and requires device-owner permission. Reports contain customer device identifiers. Unsigned executable; ADB may create host authorization keys and cached extracted files.
 
 ## Repository
-- `src/AndroidCleanerPro/` — C# / WPF source
-- `.github/workflows/windows-dotnet.yml` — portable ZIP build
-- `build-dotnet-windows.ps1` — local publish and optional ADB bundle
-- `docs/DOTNET_WINDOWS.md` — portable usage guide
+- `src/AndroidCleanerPro/` — native C# WPF source
+- `.github/workflows/windows-dotnet.yml` — portable build workflow
+- `build-dotnet-windows.ps1` — embed ADB and publish
+- `docs/DOTNET_WINDOWS.md` — technician instructions
 
-The superseded Python prototype remains recoverable from Git history.
+The earlier Python prototype remains recoverable from Git history.
