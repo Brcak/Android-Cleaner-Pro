@@ -33,25 +33,60 @@ public partial class MainWindow : Window
     {
         var previous = SelectedDevice?.Serial;
         var devices = await _adb.GetDevicesAsync();
-        DeviceSelector.ItemsSource = devices;
-        DeviceSelector.SelectedItem = devices.FirstOrDefault(x => x.Serial == previous) ?? devices.FirstOrDefault();
+        var named = devices.Select(d => d with { Description = string.IsNullOrWhiteSpace(d.Description) ? d.Serial + " (" + d.State + ")" : d.Serial + " (" + d.State + ") • " + d.Description }).ToArray();
+        DeviceSelector.ItemsSource = named;
+        DeviceSelector.SelectedItem = named.FirstOrDefault(x => x.Serial == previous) ?? named.FirstOrDefault();
+        if (SelectedDevice is { State: "device" } connected)
+            await LoadPhoneInfoAsync(connected);
         StatusText.Text = devices.Count == 0
             ? "No ADB devices. Check USB cable, drivers, debugging authorization, and adb devices -l."
             : $"{devices.Count} device(s) detected. Unauthorized devices must be approved on the phone.";
     }
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await RunAsync(RefreshDevicesAsync);
+    private async Task LoadPhoneInfoAsync(DeviceInfo device)
+    {
+        DeviceDetails.Text = $"Connected: {device.Serial} • {device.State}";
+        var brand = await _adb.GetPropertyAsync(device.Serial, "ro.product.manufacturer");
+        var model = await _adb.GetPropertyAsync(device.Serial, "ro.product.model");
+        var version = await _adb.GetPropertyAsync(device.Serial, "ro.build.version.release");
+        var sdk = await _adb.GetPropertyAsync(device.Serial, "ro.build.version.sdk");
+        var build = await _adb.GetPropertyAsync(device.Serial, "ro.build.display.id");
+        var battery = await _adb.ExecuteAsync(device.Serial, "shell", "dumpsys", "battery");
+        var level = System.Text.RegularExpressions.Regex.Match(battery, @"(?m)^\s*level:\s*(\d+)");
+        PhoneInfoText.Text = $"{brand} {model} • Android {version} (API {sdk}) • Battery: {(level.Success ? level.Groups[1].Value + "%" : "Unavailable")}\nBuild: {build}";
+    }
     private async void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         _packages.Clear();
-        if (SelectedDevice is not { } device) { DeviceDetails.Text = "No device selected"; return; }
-        DeviceDetails.Text = $"Serial: {device.Serial}  |  Status: {device.State}";
-        if (device.State != "device") { StatusText.Text = "Unlock phone and approve the USB debugging prompt."; return; }
-        await RunAsync(async () =>
+        if (SelectedDevice is not { } device) { DeviceDetails.Text = "No device selected"; PhoneInfoText.Text = ""; return; }
+        DeviceDetails.Text = $"Serial: {device.Serial} • Status: {device.State}";
+        if (device.State != "device") { PhoneInfoText.Text = "Unlock phone and approve USB debugging."; return; }
+        if (_busy) return;
+        await RunAsync(() => LoadPhoneInfoAsync(device));
+    }
+    private async void PhoneInfo_Click(object sender, RoutedEventArgs e)
+        => await RunAsync(async () =>
         {
-            var model = await _adb.GetPropertyAsync(device.Serial, "ro.product.model");
-            var version = await _adb.GetPropertyAsync(device.Serial, "ro.build.version.release");
-            DeviceDetails.Text = $"{model}  •  Android {version}  •  Serial: {device.Serial}";
+            var device = RequireDevice();
+            await LoadPhoneInfoAsync(device);
+            var storage = await _adb.ExecuteAsync(device.Serial, "shell", "df", "-h", "/data");
+            MessageBox.Show(this, PhoneInfoText.Text + "\n\nStorage (/data):\n" + storage, "Phone Information", MessageBoxButton.OK, MessageBoxImage.Information);
         });
+    private async void Recovery_Click(object sender, RoutedEventArgs e)
+        => await RunAsync(async () =>
+        {
+            var device = RequireDevice();
+            if (MessageBox.Show(this,
+                $"Reboot {device.Serial} into Android Recovery? The phone will disconnect from ADB. Do not select Wipe Data in recovery.",
+                "Confirm recovery reboot", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            await _adb.ExecuteAsync(device.Serial, "reboot", "recovery");
+            StatusText.Text = "Recovery reboot requested. Reconnect after returning to Android.";
+        });
+    private void SafeMode_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show(this,
+            "Safe Mode cannot be started reliably through standard ADB on every Android model.\n\nOn many Android phones: hold the Power button (or Power + Volume Down), then touch and hold Power off and choose Safe mode.\n\nOn Samsung devices, the exact button combination can vary. No reboot command was sent.",
+            "Safe Mode instructions", MessageBoxButton.OK, MessageBoxImage.Information);
     }
     private async void Scan_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
     {
