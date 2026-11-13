@@ -16,5 +16,10 @@ On Windows, run `./build-dotnet-windows.ps1` in PowerShell. Output: `dist/win-x6
 ## Safety and status
 This is an **experimental technician tool, not an antivirus product**. Review flags are keyword heuristics and are not confirmed malware. Uninstall is for Android user 0 and can delete customer data; use only with device-owner authorization. JSON reports contain customer device identifiers. No cloud uploads. **The native build has been committed but not yet verified on a Windows PC or physical phone.** The GitHub workflow must pass before a downloadable build is available.
 
-## Previous Python prototype
-The earlier PySide6 prototype remains under `android_cleaner/` for reference; see [legacy Python installation](docs/WINDOWS_INSTALLATION.md). Python is **not needed** for the native C# app.
+## Repository layout
+- `src/AndroidCleanerPro/` — native C# / WPF application
+- `.github/workflows/windows-dotnet.yml` — Windows build workflow
+- `build-dotnet-windows.ps1` — local publish script
+- `docs/DOTNET_WINDOWS.md` — installation and USB troubleshooting
+
+The superseded Python prototype was removed from the current branch; it remains accessible in Git history.
