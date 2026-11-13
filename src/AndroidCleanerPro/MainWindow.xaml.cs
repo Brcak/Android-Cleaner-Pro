@@ -24,10 +24,10 @@ public partial class MainWindow : Window
     {
         if (_busy) return;
         _busy = true;
-        IsEnabled = false;
+        StatusText.Text = "Working…";
         try { await action(); }
         catch (Exception ex) { StatusText.Text = ex.Message; MessageBox.Show(this, ex.Message, "Android Cleaner Pro", MessageBoxButton.OK, MessageBoxImage.Warning); }
-        finally { IsEnabled = true; _busy = false; }
+        finally { _busy = false; }
     }
     private async Task RefreshDevicesAsync()
     {
