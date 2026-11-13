@@ -7,7 +7,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>AndroidCleanerPro</AssemblyName>
   </PropertyGroup>
-  <ItemGroup Condition="Exists('Assets/platform-tools.zip')">
-    <EmbeddedResource Include="Assets/platform-tools.zip" LogicalName="AndroidCleanerPro.PlatformTools.zip" />
-  </ItemGroup>
 </Project>
