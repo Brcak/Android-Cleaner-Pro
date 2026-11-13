@@ -15,22 +15,13 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Build portable Windows EXE with embedded Google ADB
+      - name: Compile Windows desktop application
         shell: pwsh
         run: |
-          ./build-dotnet-windows.ps1 *>&1 | Tee-Object -FilePath build-output.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Upload build diagnostics even on failure
-        if: always()
+          ./build-dotnet-windows.ps1
+      - name: Upload Windows application
         uses: actions/upload-artifact@v4
         with:
-          name: AndroidCleanerPro-Build-Log
-          path: build-output.log
-          if-no-files-found: warn
-      - name: Upload portable ZIP
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: AndroidCleanerPro-Portable-win-x64
-          path: dist/AndroidCleanerPro-Portable-win-x64.zip
+          name: AndroidCleanerPro-Windows
+          path: dist/Windows/
           if-no-files-found: error
