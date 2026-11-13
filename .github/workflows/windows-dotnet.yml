@@ -19,6 +19,14 @@ jobs:
       - name: Compile Windows desktop application
         shell: pwsh
         run: ./build-dotnet-windows.ps1
+      - name: Bundle official Google Android Platform Tools
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "platform-tools.zip"
+          Invoke-WebRequest "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile $zip
+          Expand-Archive -LiteralPath $zip -DestinationPath "dist/Windows" -Force
+          if (-not (Test-Path "dist/Windows/platform-tools/adb.exe")) { throw "ADB bundle missing" }
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
