@@ -33,14 +33,14 @@
         <TextBlock x:Name="PhoneInfoText" Text="Connect a phone to view manufacturer, model, Android version, build, battery and storage." Foreground="#94A3B8" Margin="0,7,0,0" TextWrapping="Wrap"/>
       </StackPanel>
     </Border>
-    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
+    <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
       <Button Content="Scan Installed Apps" Click="Scan_Click"/>
       <Button Content="Uninstall Selected" Background="#B91C1C" Click="Uninstall_Click"/>
       <Button Content="Export JSON Report" Background="#334155" Click="Export_Click"/>
       <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
       <Button Content="Reboot Recovery" Background="#7C3AED" Click="Recovery_Click"/>
       <Button Content="Safe Mode Help" Background="#334155" Click="SafeMode_Click"/>
-    </StackPanel>
+    </WrapPanel>
     <DataGrid x:Name="PackagesGrid" Grid.Row="3" AlternationCount="2" SelectionMode="Single">
       <DataGrid.Columns>
         <DataGridTextColumn Header="App / Package" Binding="{Binding Name}" Width="2*"/>
