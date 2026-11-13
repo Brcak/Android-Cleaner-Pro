@@ -17,7 +17,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         PackagesGrid.ItemsSource = _packages;
-        Loaded += async (_, _) => await RunAsync(RefreshDevicesAsync);
+        Loaded += async (_, _) => { await RunAsync(RefreshDevicesAsync); await UpdateService.CheckAndOfferAsync(this); };
     }
     private DeviceInfo? SelectedDevice => DeviceSelector.SelectedItem as DeviceInfo;
     private async Task RunAsync(Func<Task> action)
