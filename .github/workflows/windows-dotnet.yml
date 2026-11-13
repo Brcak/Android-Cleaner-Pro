@@ -8,6 +8,8 @@ on:
       - 'build-dotnet-windows.ps1'
       - '.github/workflows/windows-dotnet.yml'
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: windows-latest
@@ -35,8 +37,16 @@ jobs:
         run: |
           $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $compiler)) { throw "Inno Setup compiler not found: $compiler" }
-          & $compiler "installer\AndroidCleanerPro.iss"
+          & $compiler "/DAppVersion=0.3.$env:GITHUB_RUN_NUMBER" "installer\AndroidCleanerPro.iss"
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed" }
+      - name: Publish versioned GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v0.3.$env:GITHUB_RUN_NUMBER"
+          gh release create $tag "dist/Installer/AndroidCleanerPro-Setup.exe" --title "Android Cleaner Pro $tag" --notes "Windows installer. Update installs over the existing version." --latest
       - name: Upload Windows Setup installer
         uses: actions/upload-artifact@v5
         with:
