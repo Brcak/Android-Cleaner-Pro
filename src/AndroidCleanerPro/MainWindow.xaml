@@ -4,6 +4,61 @@
   <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E2E8F0"/></Style>
   <Style TargetType="DataGrid"><Setter Property="Background" Value="#111E32"/><Setter Property="Foreground" Value="#E2E8F0"/><Setter Property="RowBackground" Value="#111E32"/><Setter Property="AlternatingRowBackground" Value="#17263B"/><Setter Property="GridLinesVisibility" Value="None"/><Setter Property="BorderThickness" Value="0"/><Setter Property="AutoGenerateColumns" Value="False"/><Setter Property="IsReadOnly" Value="True"/></Style>
 </Window.Resources>
+<DockPanel LastChildFill="True">
+    <StackPanel DockPanel.Dock="Top">
+        <Menu Background="#101D30" Foreground="#F1F5F9" FontSize="13" Padding="8,4" BorderBrush="#2A3B54" BorderThickness="0,0,0,1">
+            <Menu.Resources>
+                <Style TargetType="MenuItem">
+                    <Setter Property="Foreground" Value="#E2E8F0"/>
+                    <Setter Property="Background" Value="#101D30"/>
+                </Style>
+            </Menu.Resources>
+            <MenuItem Header="_File">
+                <MenuItem Header="_Export App Report..." Click="Export_Click"/>
+                <Separator/>
+                <MenuItem Header="_Settings..." Click="Settings_Click"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Device">
+                <MenuItem Header="_Refresh Devices" Click="Refresh_Click"/>
+                <MenuItem Header="Restart _ADB and Detect Phone" Click="RestartAdb_Click"/>
+                <MenuItem Header="_Stop All ADB Services..." Click="StopAdb_Click"/>
+                <Separator/>
+                <MenuItem Header="Phone _Information..." Click="PhoneInfo_Click"/>
+                <MenuItem Header="Reboot into _Recovery..." Click="Recovery_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="Scan Installed _Apps" Click="Scan_Click"/>
+                <MenuItem Header="Detect _Adware / Popups..." Click="Adware_Click"/>
+                <MenuItem Header="_Safe Mode Help..." Click="SafeMode_Click"/>
+                <Separator/>
+                <MenuItem Header="_Settings..." Click="Settings_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Documentation" Click="Documentation_Click"/>
+                <MenuItem Header="Check for _Updates" Click="Update_Click"/>
+                <Separator/>
+                <MenuItem Header="_About Android Cleaner Pro" Click="About_Click"/>
+            </MenuItem>
+        </Menu>
+        <Border Background="#132237" BorderBrush="#28405B" BorderThickness="0,0,0,1" Padding="12,7">
+            <WrapPanel Orientation="Horizontal">
+                <Button Content="↻  Refresh" Click="Refresh_Click" ToolTip="Find connected Android phones"
+                        Background="#334155" Padding="12,7"/>
+                <Button Content="▣  Phone Info" Click="PhoneInfo_Click" ToolTip="Detailed phone information"
+                        Background="#334155" Padding="12,7"/>
+                <Button Content="⬡  Adware Scan" Click="Adware_Click" ToolTip="Investigate suspicious apps and popups"
+                        Background="#0F766E" Padding="12,7"/>
+                <Button Content="⚙  Settings" Click="Settings_Click" ToolTip="Configure ADB and update preferences"
+                        Background="#334155" Padding="12,7"/>
+                <Button Content="↑  Check Updates" Click="Update_Click" ToolTip="Check GitHub Releases for updates"
+                        Background="#334155" Padding="12,7"/>
+                <Button Content="ⓘ  About" Click="About_Click" ToolTip="Program information and resources"
+                        Background="#334155" Padding="12,7"/>
+            </WrapPanel>
+        </Border>
+    </StackPanel>
 <Grid>
   <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
   <Border Background="#111B2C" Grid.Column="0" Padding="20">
@@ -58,4 +113,5 @@
     <TextBlock x:Name="StatusText" Grid.Row="4" Foreground="#94A3B8" Margin="0,12,0,0" Text="Ready. Refresh devices to begin." TextWrapping="Wrap"/>
   </Grid>
 </Grid>
+</DockPanel>
 </Window>
