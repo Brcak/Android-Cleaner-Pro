@@ -1,24 +1,28 @@
-# Android Cleaner Pro — Windows technician application
+# Android Cleaner Pro — Windows Technician Edition
 
-Native C# / .NET 10 WPF Android technician tool with a dark dashboard, ADB device discovery, Android model/version information, third-party app inventory, conservative heuristic review, individually confirmed package removal and JSON reports.
+Native C# / .NET 10 WPF application for owner-authorized Android diagnostics and app inventory.
 
-## Windows build
-Open [Windows .NET Build](https://github.com/Brcak/Android-Cleaner-Pro/actions/workflows/windows-dotnet.yml). Choose a **successful** run, download the `AndroidCleanerPro-Windows` artifact, extract it, and run `AndroidCleanerPro.exe`.
+## Install on Windows
+Download `AndroidCleanerPro-Setup.exe` from the [latest published Release](https://github.com/Brcak/Android-Cleaner-Pro/releases/latest). Run the normal Windows installer. It includes Google's official Android Platform Tools (ADB); no separate ADB PATH setup is necessary. The PC still may need the phone manufacturer's USB driver, and the phone must approve USB debugging.
 
-The experimental portable single-file/embedded-ADB approach has been removed. Install the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) and Google's [Android SDK Platform Tools](https://developer.android.com/tools/releases/platform-tools). Set ADB on PATH or place `platform-tools` next to the EXE. Windows USB drivers may also be required.
+The [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) is required. The installer does not yet install it automatically.
 
-This produces a standard Windows application folder, **not yet a Setup.exe or MSI installer**. See [Windows installation guide](docs/DOTNET_WINDOWS.md).
+## Software updates
+The app checks for newer published GitHub Releases on startup. You can also use **Check for Updates**. After you approve an update, the app downloads the official installer, verifies its published SHA-256 checksum, launches the visible installer, and closes the old app. The new installer replaces the existing version without uninstalling first.
 
-## Development
-Install .NET 10 SDK on Windows and run `./build-dotnet-windows.ps1`. Build output: `dist/Windows/`.
+**Important for older installs:** A prior updater could close the app while starting its installer silently. If that happens, manually install the latest version from GitHub Releases **once** to get the newer, safer updater. For diagnostics, see [Update Troubleshooting](docs/UPDATES.md); logs are written to `%LOCALAPPDATA%\AndroidCleanerPro\logs\updater.log`.
 
-## Safety and status
-**Experimental; successful CI compilation and physical phone tests have not been verified.** Not an antivirus product. Package-name heuristics are not malware findings. Removing apps may erase data; obtain customer permission. Exported reports include device identifiers.
+## Features
+- Device discovery and connection status
+- Phone manufacturer/model, Android version, battery and storage data (when available over ADB)
+- Third-party app inventory and conservative package-name review
+- Single-package uninstall with explicit technician confirmation
+- Recovery reboot with confirmation; manual Safe Mode guidance
+- JSON reports
 
-## Repository
-- `src/AndroidCleanerPro/` — native WPF application
-- `.github/workflows/windows-dotnet.yml` — normal Windows build
-- `build-dotnet-windows.ps1` — publish script
-- `docs/DOTNET_WINDOWS.md` — setup and troubleshooting
+App icons are not yet implemented. The tool is experimental, not an antivirus product. Package-name flags do not establish malware, and uninstalling can erase app data. Use only with the device owner's permission. Reports contain device identifiers.
 
-The obsolete Python prototype remains recoverable in Git history.
+## Developers
+Install the .NET 10 SDK on Windows and run `./build-dotnet-windows.ps1`. CI builds and Inno Setup releases use [Windows .NET Build](https://github.com/Brcak/Android-Cleaner-Pro/actions/workflows/windows-dotnet.yml).
+
+The older Python prototype is available through Git history.
