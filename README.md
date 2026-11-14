@@ -23,6 +23,7 @@ The main window now includes a conventional **File / Device / Tools / Help** men
 - Single-package uninstall with explicit technician confirmation
 - Recovery reboot with confirmation; manual Safe Mode guidance
 - **Firmware / Fastboot Tools**: detect Fastboot devices, inspect bootloader state and verify firmware image checksums; limited, manually confirmed single-partition flashing only for already-unlocked compatible devices ([guide](docs/FIRMWARE_FLASHING.md)). Samsung Odin/Download Mode flashing is not implemented.
+- **FRP Recovery Assistant**: owner-verification checklist and official Google/Samsung/Motorola/Pixel account-recovery instructions; works without ADB, never bypasses FRP ([guide](docs/FRP_RECOVERY.md)).
 - JSON reports
 
 App icons are not yet implemented. Adware indicators and foreground observations are not proof of malware or proof of which app generated an advertisement. The tool is experimental, not an antivirus product. Package-name flags do not establish malware, and uninstalling can erase app data. Use only with the device owner's permission. Reports contain device identifiers.
