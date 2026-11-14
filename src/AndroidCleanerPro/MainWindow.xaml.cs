@@ -335,6 +335,13 @@ public partial class MainWindow : Window
         window.ShowDialog();
     }
 
+    private void ConnectionRecovery_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        var window = new ConnectionRecoveryWindow { Owner = this };
+        window.ShowDialog();
+    }
+
     private void Firmware_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
