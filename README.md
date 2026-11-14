@@ -12,6 +12,9 @@ The app checks for newer published GitHub Releases on startup. You can also use 
 
 **Important for older installs:** A prior updater could close the app while starting its installer silently. If that happens, manually install the latest version from GitHub Releases **once** to get the newer, safer updater. For diagnostics, see [Update Troubleshooting](docs/UPDATES.md); logs are written to `%LOCALAPPDATA%\AndroidCleanerPro\logs\updater.log`.
 
+## Desktop menu, toolbar and settings
+The main window now includes a conventional **File / Device / Tools / Help** menu and a quick-access toolbar for refreshing phones, phone information, adware diagnostics, Settings, update checks and About. **Tools → Settings** lets technicians choose whether to check for updates at launch and optionally use a custom ADB executable. Preferences are saved per Windows user in `%LOCALAPPDATA%\\AndroidCleanerPro\\settings.json`; the default continues to use bundled ADB. **Help → About** displays the installed version, .NET runtime, and project links. See [Settings and navigation](docs/SETTINGS_AND_MENUS.md).
+
 ## Features
 - Device discovery and connection status
 - Phone manufacturer/model, Android version, battery and storage data (when available over ADB)
