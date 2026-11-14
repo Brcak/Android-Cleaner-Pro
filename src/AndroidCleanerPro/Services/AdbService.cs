@@ -8,7 +8,18 @@ public record DeviceInfo(string Serial, string State, string Description)
 {
     public override string ToString() => $"{Serial} — {State} {Description}";
 }
-public record PackageInfo(string Name, string Installer, string Risk, string Reason);
+public record PackageInfo(string Name, string Installer, string Risk, string Reason)
+{
+    // Inventory metadata is optional and does not change the existing adware scanner.
+    public string Category { get; init; } = "Other apps";
+    public bool IsSystemApp { get; init; }
+    public bool IsFamiliarCategory { get; init; }
+    public DateTimeOffset? FirstInstalledUtc { get; init; }
+    public DateTimeOffset? LastUpdatedUtc { get; init; }
+    public string TypeLabel => IsSystemApp ? "System" : "User";
+    public string InstalledLabel => FirstInstalledUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "Not reported";
+    public string UpdatedLabel => LastUpdatedUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "Not reported";
+}
 public record AdbStopResult(int StoppedProcesses, int BlockedProcesses, string Notes);
 
 public sealed class AdbService
