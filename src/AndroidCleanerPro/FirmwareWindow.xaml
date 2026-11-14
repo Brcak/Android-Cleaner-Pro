@@ -1,0 +1,178 @@
+<Window x:Class="AndroidCleanerPro.FirmwareWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Firmware Tools | Android Cleaner Pro"
+        Width="1190" Height="815" MinWidth="930" MinHeight="640"
+        WindowStartupLocation="CenterOwner" Background="#0B1220"
+        Foreground="#E2E8F0" FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+        </Style>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="13,9"/>
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0,0,9,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style x:Key="Section" TargetType="Border">
+            <Setter Property="Background" Value="#17263B"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="Margin" Value="0,0,0,13"/>
+        </Style>
+        <Style x:Key="Caption" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#93A9C3"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Background="#111E32" Padding="26,19"
+                BorderBrush="#2B425F" BorderThickness="0,0,0,1">
+            <StackPanel>
+                <TextBlock Text="FIRMWARE / FASTBOOT TOOLS" Foreground="#60A5FA" FontSize="11" FontWeight="Bold"/>
+                <TextBlock Text="Firmware Service Console" FontWeight="Bold" FontSize="27" Margin="0,6,0,3"/>
+                <TextBlock Text="Bootloader diagnostics and guarded single-image flashing • no automatic unlock, erase or batch scripts"
+                           Foreground="#9CB0C9" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+        <Grid Grid.Row="1" Margin="20,16,20,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.15*"/>
+                <ColumnDefinition Width="0.85*"/>
+            </Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,12,5">
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="1  •  Detect Fastboot device" FontSize="16" FontWeight="SemiBold"/>
+                            <TextBlock Text="Bootloader/Fastboot mode is different from regular Android ADB. Enter it only with customer authorization."
+                                       Style="{StaticResource Caption}" Margin="0,7,0,12"/>
+                            <WrapPanel>
+                                <Button x:Name="EnterBootloaderButton" Style="{StaticResource ActionButton}"
+                                        Content="ADB → Reboot Bootloader" Click="EnterBootloader_Click"/>
+                                <Button x:Name="DetectButton" Style="{StaticResource ActionButton}" Background="#0F766E"
+                                        Content="Find Fastboot Devices" Click="Detect_Click"/>
+                            </WrapPanel>
+                            <ComboBox x:Name="FastbootSelector" DisplayMemberPath="Serial"
+                                      Height="34" Background="#F8FAFC" Foreground="#0F172A"
+                                      SelectionChanged="FastbootSelector_SelectionChanged"/>
+                            <WrapPanel Margin="0,12,0,0">
+                                <Button x:Name="InspectButton" Style="{StaticResource ActionButton}"
+                                        Content="Read Bootloader State" Click="Inspect_Click"/>
+                                <Button x:Name="RebootButton" Style="{StaticResource ActionButton}"
+                                        Content="Reboot to Android" Background="#334155" Click="Reboot_Click"/>
+                            </WrapPanel>
+                            <TextBlock x:Name="BootloaderText" Text="No Fastboot phone selected."
+                                       TextWrapping="Wrap" Foreground="#BFDBFE" Margin="0,7,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="2  •  Verify firmware image" FontSize="16" FontWeight="SemiBold"/>
+                            <TextBlock Text="Select a genuine .img file from firmware verified for this exact device product. The tool does not download, validate compatibility of, or extract firmware packages."
+                                       Style="{StaticResource Caption}" Margin="0,7,0,12"/>
+                            <TextBlock Text="Target partition" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <ComboBox x:Name="PartitionSelector" Height="34"
+                                      Background="#F8FAFC" Foreground="#0F172A" Margin="0,0,0,11"/>
+                            <TextBlock Text="Image file (.img)" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <DockPanel LastChildFill="True" Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right" x:Name="BrowseButton" Style="{StaticResource ActionButton}"
+                                        Content="Browse…" Click="Browse_Click" Margin="10,0,0,0"/>
+                                <TextBox x:Name="ImagePathBox" Background="#0D192A" Foreground="White"
+                                         BorderBrush="#3E5574" Padding="9" IsReadOnly="True" VerticalContentAlignment="Center"/>
+                            </DockPanel>
+                            <TextBlock Text="Expected device product / codename from firmware instructions"
+                                       TextWrapping="Wrap" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox x:Name="PackageProductBox" Background="#0D192A" Foreground="White"
+                                     BorderBrush="#3E5574" Padding="9" Margin="0,0,0,11"/>
+                            <TextBlock Text="Optional published image SHA-256 checksum (64 hexadecimal characters)"
+                                       TextWrapping="Wrap" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                            <TextBox x:Name="ExpectedHashBox" Background="#0D192A" Foreground="White"
+                                     BorderBrush="#3E5574" Padding="9" Margin="0,0,0,10"/>
+                            <Button x:Name="VerifyButton" Style="{StaticResource ActionButton}" HorizontalAlignment="Left"
+                                    Content="Calculate Image SHA-256" Click="Verify_Click"/>
+                            <TextBlock x:Name="ImageHashText" Text="No image selected."
+                                       Foreground="#BFDBFE" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="3  •  Confirm and flash selected image"
+                                       FontSize="16" FontWeight="SemiBold"/>
+                            <TextBlock Text="Danger: incorrect partitions or firmware can permanently brick a phone or cause data loss. This tool does not unlock bootloaders and never wipes, relocks, or runs vendor scripts."
+                                       Foreground="#FBBF24" TextWrapping="Wrap" Margin="0,7,0,12"/>
+                            <CheckBox x:Name="AuthorizationCheck" Foreground="#E2E8F0" Margin="0,0,0,12">
+                                <TextBlock TextWrapping="Wrap" MaxWidth="435">
+                                    I have the owner's authorization, a verified backup, and have checked that this image matches the exact device and target partition.
+                                </TextBlock>
+                            </CheckBox>
+                            <TextBlock Text="Type FLASH followed by the device product, e.g. FLASH husky"
+                                       FontSize="12" Foreground="#93A9C3" Margin="0,0,0,5"/>
+                            <TextBox x:Name="ConfirmationBox" Background="#0D192A" Foreground="White"
+                                     BorderBrush="#3E5574" Padding="9" Margin="0,0,0,12"/>
+                            <Button x:Name="FlashButton" Style="{StaticResource ActionButton}" Background="#B91C1C"
+                                    Content="Flash Verified Image…" FontWeight="Bold" Padding="16,11"
+                                    Click="Flash_Click" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="7,0,0,0">
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="Session output" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="StatusText" Text="Ready to detect Fastboot devices."
+                                       Foreground="#9CB0C9" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <TextBox x:Name="LogBox" Height="290" TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                     Background="#071321" Foreground="#E2E8F0" Padding="12"
+                                     FontFamily="Consolas" FontSize="12"
+                                     IsReadOnly="True" AcceptsReturn="True"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="Manufacturer compatibility" FontSize="16" FontWeight="SemiBold"/>
+                            <TextBlock Text="Google Pixel / Motorola / other Fastboot phones: Fastboot commands may work when the OEM supports them and the bootloader is unlocked."
+                                       Style="{StaticResource Caption}" Margin="0,10,0,10"/>
+                            <TextBlock Text="Samsung Galaxy: typically uses Download Mode rather than standard Fastboot. Samsung Odin/Download Mode flashing is not included. Do NOT flash Samsung images through this Fastboot workflow."
+                                       Foreground="#FBBF24" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <WrapPanel>
+                                <Button Style="{StaticResource ActionButton}" Background="#334155"
+                                        Content="Android Fastboot Docs" Click="FastbootDocs_Click"/>
+                                <Button Style="{StaticResource ActionButton}" Background="#334155"
+                                        Content="Samsung Support" Click="SamsungDocs_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Section}">
+                        <StackPanel>
+                            <TextBlock Text="Safety restrictions" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,9"/>
+                            <TextBlock Text="• One selected Fastboot device only&#10;• Unlocked bootloader must be verified&#10;• Device product/codename must match&#10;• SHA-256 is calculated and rechecked&#10;• Only boot, init_boot, vendor_boot or recovery partitions&#10;• No unlock/lock, erase, repartition, or FRP bypass"
+                                       Style="{StaticResource Caption}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+        <Border Grid.Row="2" Background="#111E32" Padding="20,12"
+                BorderBrush="#2B425F" BorderThickness="0,1,0,0">
+            <DockPanel LastChildFill="True">
+                <Button DockPanel.Dock="Right" Content="Close" Click="Close_Click"
+                        Style="{StaticResource ActionButton}" Background="#334155" Margin="0"/>
+                <TextBlock Text="Firmware flashing is high risk. The operator is responsible for confirming exact OEM compatibility."
+                           VerticalAlignment="Center" Foreground="#94A3B8" TextWrapping="Wrap"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
