@@ -155,7 +155,7 @@ public sealed class InventoryService(AdbService adb)
             var minutes = int.Parse(match.Groups["mm"].Value, CultureInfo.InvariantCulture);
             var result = TimeSpan.FromMinutes(hours * 60 + minutes);
             if (match.Groups["sign"].Value == "-") result = -result;
-            return result is >= { TotalHours: -14 } and <= { TotalHours: 14 }
+            return result.TotalHours >= -14 && result.TotalHours <= 14
                 ? result : null;
         }
         catch { return null; }
