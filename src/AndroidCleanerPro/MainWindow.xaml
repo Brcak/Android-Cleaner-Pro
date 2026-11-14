@@ -39,6 +39,7 @@
     </Border>
     <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
       <Button Content="Scan Installed Apps" Click="Scan_Click"/>
+      <Button Content="Detect Adware / Popups" Background="#0F766E" Click="Adware_Click"/>
       <Button Content="Uninstall Selected" Background="#B91C1C" Click="Uninstall_Click"/>
       <Button Content="Export JSON Report" Background="#334155" Click="Export_Click"/>
       <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
