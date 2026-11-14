@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
@@ -18,8 +19,44 @@ public partial class MainWindow : Window
         InitializeComponent();
         PackagesGrid.ItemsSource = _packages;
         VersionText.Text = "v" + (typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "unknown") + " • Native C# / WPF";
-        Loaded += async (_, _) => { await RunAsync(RefreshDevicesAsync); await UpdateService.CheckAndOfferAsync(this); };
+        Loaded += async (_, _) =>
+        {
+            await RunAsync(RefreshDevicesAsync);
+            if (SettingsStore.Current.CheckForUpdatesOnStartup)
+                await UpdateService.CheckAndOfferAsync(this);
+        };
     }
+    private void Settings_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        var dialog = new SettingsWindow { Owner = this };
+        if (dialog.ShowDialog() == true)
+            StatusText.Text = "Settings saved. Changes to the ADB path will be used by the next device operation.";
+    }
+
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new AboutWindow { Owner = this };
+        dialog.ShowDialog();
+    }
+
+    private void Exit_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void Documentation_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(
+                "https://github.com/Brcak/Android-Cleaner-Pro/blob/main/docs/DOTNET_WINDOWS.md")
+            { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "Unable to open documentation: " + ex.Message,
+                "Documentation", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private DeviceInfo? SelectedDevice => DeviceSelector.SelectedItem as DeviceInfo;
     private async Task RunAsync(Func<Task> action)
     {
