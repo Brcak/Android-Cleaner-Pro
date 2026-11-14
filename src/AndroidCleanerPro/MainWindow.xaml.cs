@@ -176,6 +176,14 @@ public partial class MainWindow : Window
     }
     private async void Update_Click(object sender, RoutedEventArgs e)
         => await UpdateService.CheckAndOfferAsync(this, manual: true);
+    private void FrpRecovery_Click(object sender, RoutedEventArgs e)
+    {
+        // FRP setup locks generally do not allow ADB debugging. This help window
+        // intentionally works without a connected or authorized device.
+        var window = new FrpRecoveryWindow { Owner = this };
+        window.ShowDialog();
+    }
+
     private void Firmware_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
