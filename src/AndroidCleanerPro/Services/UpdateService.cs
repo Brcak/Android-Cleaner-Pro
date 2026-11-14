@@ -104,6 +104,16 @@ public static class UpdateService
             var path = await DownloadVerifiedInstallerAsync(downloadUrl, expectedHash, latest);
             WriteLog($"SHA-256 verification succeeded for update {latest}.");
 
+            // The bundled ADB server may keep adb.exe in the installation directory
+            // in use. Stop it before starting Inno Setup so the files can be replaced.
+            WriteLog("Stopping ADB services before starting update installer.");
+            var adbStop = await new AdbService().StopAllAdbProcessesAsync();
+            WriteLog($"ADB stopped. Other processes stopped: {adbStop.StoppedProcesses}; blocked: {adbStop.BlockedProcesses}. {adbStop.Notes}");
+            if (adbStop.BlockedProcesses > 0)
+                throw new InvalidOperationException(
+                    "Some ADB processes could not be closed. Close Android Studio or other ADB tools and retry the update. " +
+                    adbStop.Notes);
+
             // Use a visible installer instead of silent install + forced restart.
             // Only close the app once Windows confirms the installer was launched.
             Process? installer;
