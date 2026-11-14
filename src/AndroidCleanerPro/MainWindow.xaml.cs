@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using AndroidCleanerPro.Services;
 using Microsoft.Win32;
 
@@ -17,6 +18,9 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<PackageInfo> _packages = new();
     private ICollectionView? _packageView;
     private bool _busy;
+    private enum NavigationPage { Dashboard, Inventory, Security, Reports }
+    private NavigationPage _currentPage = NavigationPage.Dashboard;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -25,6 +29,7 @@ public partial class MainWindow : Window
         PackagesGrid.ItemsSource = _packageView;
         _packages.CollectionChanged += (_, _) => UpdateInventoryCount();
         UpdateInventoryCount();
+        NavigateTo(NavigationPage.Dashboard);
         VersionText.Text = "v" + (typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "unknown") + " • Native C# / WPF";
         Loaded += async (_, _) =>
         {
@@ -33,6 +38,73 @@ public partial class MainWindow : Window
                 await UpdateService.CheckAndOfferAsync(this);
         };
     }
+    // The sidebar used to contain decorative TextBlocks. These are now real
+    // navigation buttons with distinct screens, keyboard focus and selection state.
+    private void NavigateTo(NavigationPage page)
+    {
+        _currentPage = page;
+        var dashboard = page == NavigationPage.Dashboard;
+        var inventory = page == NavigationPage.Inventory;
+
+        ConnectedDevicesPanel.Visibility = dashboard ? Visibility.Visible : Visibility.Collapsed;
+        MainActionsPanel.Visibility = dashboard || inventory ? Visibility.Visible : Visibility.Collapsed;
+        InventoryFiltersPanel.Visibility = dashboard || inventory ? Visibility.Visible : Visibility.Collapsed;
+        PackagesGrid.Visibility = dashboard || inventory ? Visibility.Visible : Visibility.Collapsed;
+        SecurityReviewPanel.Visibility = page == NavigationPage.Security
+            ? Visibility.Visible : Visibility.Collapsed;
+        ReportsPanel.Visibility = page == NavigationPage.Reports
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        (PageTitle.Text, PageSubtitle.Text) = page switch
+        {
+            NavigationPage.Dashboard => ("Device Dashboard",
+                "Connect an authorized Android phone and access diagnostic tools."),
+            NavigationPage.Inventory => ("App Inventory",
+                "Scan apps, review installation dates and filter by vendor or type."),
+            NavigationPage.Security => ("Security Review",
+                "Investigate popups, overlays and suspicious app behavior."),
+            NavigationPage.Reports => ("JSON Reports",
+                "Export the currently filtered installed-app inventory."),
+            _ => ("Android Cleaner Pro", "Technician tools")
+        };
+
+        HighlightSidebarButton(DashboardNavButton, dashboard);
+        HighlightSidebarButton(InventoryNavButton, inventory);
+        HighlightSidebarButton(SecurityNavButton, page == NavigationPage.Security);
+        HighlightSidebarButton(ReportsNavButton, page == NavigationPage.Reports);
+        UpdateInventoryCount();
+    }
+
+    private static void HighlightSidebarButton(Button button, bool selected)
+    {
+        button.Background = selected
+            ? new SolidColorBrush(Color.FromRgb(31, 61, 100))
+            : Brushes.Transparent;
+        button.Foreground = selected ? Brushes.White
+            : new SolidColorBrush(Color.FromRgb(203, 213, 225));
+        button.FontWeight = selected ? FontWeights.SemiBold : FontWeights.Normal;
+    }
+
+    private void DashboardNav_Click(object sender, RoutedEventArgs e)
+        => NavigateTo(NavigationPage.Dashboard);
+
+    private async void InventoryNav_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo(NavigationPage.Inventory);
+        // Opening the inventory should be useful even if it has never been scanned.
+        // Do not rescan when navigating between tabs unless the inventory is empty.
+        if (!_busy && _packages.Count == 0 && SelectedDevice is { State: "device" })
+            await ScanInventoryAsync();
+        else if (_packages.Count == 0 && SelectedDevice is not { State: "device" })
+            StatusText.Text = "Connect and authorize a phone, then click Scan Installed Apps.";
+    }
+
+    private void SecurityNav_Click(object sender, RoutedEventArgs e)
+        => NavigateTo(NavigationPage.Security);
+
+    private void ReportsNav_Click(object sender, RoutedEventArgs e)
+        => NavigateTo(NavigationPage.Reports);
+
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
@@ -125,6 +197,11 @@ public partial class MainWindow : Window
         if (InventoryCountText is null) return;
         var visible = _packageView?.Cast<PackageInfo>().Count() ?? 0;
         InventoryCountText.Text = $"{visible:N0} shown / {_packages.Count:N0} scanned";
+        if (ReportsSummaryText is not null)
+            ReportsSummaryText.Text = _packages.Count == 0
+                ? "No inventory scanned yet. Open App Inventory to scan the selected phone."
+                : $"{visible:N0} visible apps out of {_packages.Count:N0} scanned. " +
+                  "Only the visible apps will be exported.";
     }
 
     private DeviceInfo? SelectedDevice => DeviceSelector.SelectedItem as DeviceInfo;
@@ -196,7 +273,11 @@ public partial class MainWindow : Window
                 StatusText.Text = "ADB restarted but no phone is listed. Unlock the phone, approve USB debugging, and check the USB data cable or Windows driver.";
         });
 
-    private async void Refresh_Click(object sender, RoutedEventArgs e) => await RunAsync(RefreshDevicesAsync);
+    private async void Refresh_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo(NavigationPage.Dashboard);
+        await RunAsync(RefreshDevicesAsync);
+    }
     private async Task LoadPhoneInfoAsync(DeviceInfo device)
     {
         DeviceDetails.Text = $"Connected: {device.Serial} • {device.State}";
@@ -266,6 +347,7 @@ public partial class MainWindow : Window
 
     private void Adware_Click(object sender, RoutedEventArgs e)
     {
+        NavigateTo(NavigationPage.Security);
         if (_busy) return;
         if (SelectedDevice is not { State: "device" } device)
         {
@@ -276,7 +358,13 @@ public partial class MainWindow : Window
         var window = new AdwareScanWindow(_adb, device) { Owner = this };
         window.ShowDialog();
     }
-    private async void Scan_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
+    private async void Scan_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo(NavigationPage.Inventory);
+        await ScanInventoryAsync();
+    }
+
+    private Task ScanInventoryAsync() => RunAsync(async () =>
     {
         var device = RequireDevice();
         StatusText.Text = "Reading system and user app inventory. Android install dates may take longer...";
