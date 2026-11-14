@@ -23,3 +23,15 @@ The app is experimental and is not antivirus software. Package review labels are
 Select an authorized phone and click **Phone Info**. The redesigned detail window reports device manufacturer, brand, model number, product name, device code name, serial identifiers when available, Android version/API/build/security patch, bootloader, battery level/status/temperature/voltage, CPU ABI, RAM, storage usage and screen dimensions/density. Fields not accessible through standard ADB are clearly labeled as not reported.
 
 IMEI 1 and IMEI 2 are **manual-entry fields**. Modern Android restricts IMEI retrieval for ordinary ADB shell clients. Obtain values with the device owner's permission through the phone itself (typically dial `*#06#` or use Settings → About phone). The application does not silently bypass Android's access controls, and manually entered IMEIs are not saved or included in copied summaries. The Copy device summary action excludes IMEI values.
+
+
+## ADB service controls and phone reconnect
+
+The **Connected Devices** area includes two maintenance buttons:
+
+- **Stop All ADB Services**: After confirmation, sends `adb kill-server` and terminates remaining accessible Windows `adb.exe` processes. It clears stale device listings. This can interrupt Android Studio, other Android repair tools, and active ADB sessions on the PC. It does **not** remove or change any data on the phone. Processes started by another Windows account or elevated programs may not be stoppable without sufficient permissions.
+- **Restart ADB + Detect Phone**: Stops old ADB processes, starts a fresh ADB server, then refreshes connected devices. The USB authorization prompt may reappear; unlock the phone and approve it.
+
+Normal **Refresh Devices** does not kill ADB. During a verified in-app installer update, Android Cleaner Pro now stops ADB before it launches the installer to avoid locking bundled Platform Tools executables.
+
+If the phone still does not show after ADB restart: confirm USB debugging is enabled, use a data-capable cable, approve the authorization dialog, try a different USB port, and check Windows USB drivers. ADB can't bypass phone authorization. If another Android tool immediately restarts its own ADB server, close that tool before retrying.
