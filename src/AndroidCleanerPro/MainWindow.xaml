@@ -14,7 +14,7 @@
       <TextBlock Text="▦  App Inventory" FontSize="15" Margin="0,0,0,22"/>
       <TextBlock Text="⬡  Security Review" FontSize="15" Margin="0,0,0,22"/>
       <TextBlock Text="↧  JSON Reports" FontSize="15"/>
-      <TextBlock Text="v0.3 • Native C# / WPF" Foreground="#64748B" VerticalAlignment="Bottom" Margin="0,260,0,0"/>
+      <TextBlock x:Name="VersionText" Text="Native C# / WPF" Foreground="#64748B" VerticalAlignment="Bottom" Margin="0,260,0,0"/>
     </StackPanel>
   </Border>
   <Grid Grid.Column="1" Margin="26,20">
@@ -40,6 +40,7 @@
       <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
       <Button Content="Reboot Recovery" Background="#7C3AED" Click="Recovery_Click"/>
       <Button Content="Safe Mode Help" Background="#334155" Click="SafeMode_Click"/>
+      <Button Content="Check for Updates" Background="#0F766E" Click="Update_Click"/>
     </WrapPanel>
     <DataGrid x:Name="PackagesGrid" Grid.Row="3" AlternationCount="2" SelectionMode="Single">
       <DataGrid.Columns>
