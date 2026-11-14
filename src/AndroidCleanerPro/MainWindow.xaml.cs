@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         PackagesGrid.ItemsSource = _packages;
+        VersionText.Text = "v" + (typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "unknown") + " • Native C# / WPF";
         Loaded += async (_, _) => { await RunAsync(RefreshDevicesAsync); await UpdateService.CheckAndOfferAsync(this); };
     }
     private DeviceInfo? SelectedDevice => DeviceSelector.SelectedItem as DeviceInfo;
@@ -88,6 +89,8 @@ public partial class MainWindow : Window
             "Safe Mode cannot be started reliably through standard ADB on every Android model.\n\nOn many Android phones: hold the Power button (or Power + Volume Down), then touch and hold Power off and choose Safe mode.\n\nOn Samsung devices, the exact button combination can vary. No reboot command was sent.",
             "Safe Mode instructions", MessageBoxButton.OK, MessageBoxImage.Information);
     }
+    private async void Update_Click(object sender, RoutedEventArgs e)
+        => await UpdateService.CheckAndOfferAsync(this, manual: true);
     private async void Scan_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
     {
         var device = RequireDevice();
