@@ -38,11 +38,57 @@ public partial class MainWindow : Window
         DeviceSelector.ItemsSource = named;
         DeviceSelector.SelectedItem = named.FirstOrDefault(x => x.Serial == previous) ?? named.FirstOrDefault();
         if (SelectedDevice is { State: "device" } connected)
-            await LoadPhoneInfoAsync(connected);
+        {
+            try { await LoadPhoneInfoAsync(connected); }
+            catch (Exception ex)
+            {
+                DeviceDetails.Text = $"Connected: {connected.Serial} • device";
+                PhoneInfoText.Text = "Connected, but optional phone details could not be read: " + ex.Message;
+            }
+        }
         StatusText.Text = devices.Count == 0
             ? "No ADB devices. Check USB cable, drivers, debugging authorization, and adb devices -l."
             : $"{devices.Count} device(s) detected. Unauthorized devices must be approved on the phone.";
     }
+    private async void StopAdb_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        if (MessageBox.Show(this,
+            "Stop every accessible adb.exe process on this PC? This will disconnect connected phones and may interrupt Android Studio, other repair tools, and active ADB transfers. No files on the phone will be removed.",
+            "Confirm: Stop All ADB Services",
+            MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+
+        await RunAsync(async () =>
+        {
+            var result = await _adb.StopAllAdbProcessesAsync();
+            DeviceSelector.ItemsSource = null;
+            _packages.Clear();
+            DeviceDetails.Text = "ADB services stopped.";
+            PhoneInfoText.Text = "Click Restart ADB + Detect Phone to reconnect.";
+            StatusText.Text = $"ADB server stopped. Additional adb.exe processes stopped: {result.StoppedProcesses}. Unable to stop: {result.BlockedProcesses}.";
+            if (result.BlockedProcesses > 0)
+                MessageBox.Show(this, result.Notes,
+                    "Some ADB processes could not be stopped",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+        });
+    }
+
+    private async void RestartAdb_Click(object sender, RoutedEventArgs e)
+        => await RunAsync(async () =>
+        {
+            StatusText.Text = "Stopping ADB services before reconnecting...";
+            var result = await _adb.StopAllAdbProcessesAsync();
+            if (result.BlockedProcesses > 0)
+                throw new InvalidOperationException(
+                    $"Unable to stop {result.BlockedProcesses} ADB process(es). Close other Android tools or run with appropriate Windows permissions. {result.Notes}");
+            StatusText.Text = "Starting a clean ADB server...";
+            await _adb.StartServerAsync();
+            await Task.Delay(750);
+            await RefreshDevicesAsync();
+            if (SelectedDevice is null)
+                StatusText.Text = "ADB restarted but no phone is listed. Unlock the phone, approve USB debugging, and check the USB data cable or Windows driver.";
+        });
+
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await RunAsync(RefreshDevicesAsync);
     private async Task LoadPhoneInfoAsync(DeviceInfo device)
     {
