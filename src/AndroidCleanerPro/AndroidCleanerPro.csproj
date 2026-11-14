@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>AndroidCleanerPro</AssemblyName>
+    <ApplicationIcon>Assets\AndroidCleanerPro.ico</ApplicationIcon>
     <Version Condition="'$(Version)' == ''">0.3.0</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\AndroidCleanerPro.ico" />
+  </ItemGroup>
 </Project>
