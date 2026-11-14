@@ -176,6 +176,16 @@ public partial class MainWindow : Window
     }
     private async void Update_Click(object sender, RoutedEventArgs e)
         => await UpdateService.CheckAndOfferAsync(this, manual: true);
+    private void Firmware_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        var authorizedAdbSerial = SelectedDevice is { State: "device" } connected
+            ? connected.Serial
+            : null;
+        var window = new FirmwareWindow(_adb, authorizedAdbSerial) { Owner = this };
+        window.ShowDialog();
+    }
+
     private void Adware_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
