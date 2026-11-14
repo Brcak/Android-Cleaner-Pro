@@ -15,6 +15,7 @@ OutputBaseFilename=AndroidCleanerPro-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\src\AndroidCleanerPro\Assets\AndroidCleanerPro.ico
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
