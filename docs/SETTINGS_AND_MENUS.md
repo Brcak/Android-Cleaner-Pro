@@ -23,3 +23,17 @@ Settings are local to your Windows user at `%LOCALAPPDATA%\AndroidCleanerPro\set
 **Help → About Android Cleaner Pro** shows the installed application version, the active .NET runtime and links to the source repository, release downloads and Google's official ADB documentation.
 
 The Windows installer updates the existing application; no uninstall is needed first. The release remains an experimental diagnostic utility and does not certify an app as malware.
+
+
+## Working left-sidebar navigation
+
+The left sidebar items are now actual **buttons**, not decorative labels:
+
+- **Device Dashboard**: Shows the connected-device controls, phone details, and the existing inventory preview.
+- **App Inventory**: Opens a full-height inventory view and automatically scans the selected, authorized phone if no inventory is loaded yet. Previously scanned rows are retained when switching views.
+- **Security Review**: Opens a dedicated security landing panel with **Open Adware / Popup Scanner** and **Safe Mode Instructions** actions.
+- **JSON Reports**: Opens a dedicated report panel with the current visible/scanned counts. **Export Visible Apps to JSON** saves the filtered inventory; **View and Filter Apps** returns to the inventory.
+
+The currently selected sidebar item is highlighted. All sidebar controls are keyboard-focusable. The toolbar and standard menus remain available and use the same existing actions. A connected and authorized phone is still required for ADB operations; the sidebar itself remains navigable without a phone.
+
+When testing a new release, verify that each sidebar button changes screens, that **App Inventory** retains existing filters when navigating away and back, and that **JSON Reports** handles an empty inventory without creating a misleading report.
