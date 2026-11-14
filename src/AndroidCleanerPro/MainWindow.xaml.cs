@@ -69,9 +69,11 @@ public partial class MainWindow : Window
         => await RunAsync(async () =>
         {
             var device = RequireDevice();
-            await LoadPhoneInfoAsync(device);
-            var storage = await _adb.ExecuteAsync(device.Serial, "shell", "df", "-h", "/data");
-            MessageBox.Show(this, PhoneInfoText.Text + "\n\nStorage (/data):\n" + storage, "Phone Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            StatusText.Text = "Reading phone identity, battery, and hardware details...";
+            var details = await new PhoneDetailsService(_adb).ReadAsync(device);
+            var window = new PhoneInfoWindow(details) { Owner = this };
+            window.ShowDialog();
+            StatusText.Text = $"Phone details loaded for {device.Serial}.";
         });
     private async void Recovery_Click(object sender, RoutedEventArgs e)
         => await RunAsync(async () =>
