@@ -17,3 +17,9 @@ Install .NET 10 SDK on Windows. Run `./build-dotnet-windows.ps1`. Output: `dist/
 
 ## Safety
 The app is experimental and is not antivirus software. Package review labels are heuristics, not malware verdicts. Uninstall can erase app data; use only with owner authorization. JSON reports contain device identifiers. Windows build success and real-device operation remain unverified.
+
+
+## Expanded Phone Information window
+Select an authorized phone and click **Phone Info**. The redesigned detail window reports device manufacturer, brand, model number, product name, device code name, serial identifiers when available, Android version/API/build/security patch, bootloader, battery level/status/temperature/voltage, CPU ABI, RAM, storage usage and screen dimensions/density. Fields not accessible through standard ADB are clearly labeled as not reported.
+
+IMEI 1 and IMEI 2 are **manual-entry fields**. Modern Android restricts IMEI retrieval for ordinary ADB shell clients. Obtain values with the device owner's permission through the phone itself (typically dial `*#06#` or use Settings → About phone). The application does not silently bypass Android's access controls, and manually entered IMEIs are not saved or included in copied summaries. The Copy device summary action excludes IMEI values.
