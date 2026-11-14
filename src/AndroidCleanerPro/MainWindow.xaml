@@ -29,6 +29,10 @@
           <Button DockPanel.Dock="Right" Content="Refresh Devices" Click="Refresh_Click"/>
           <ComboBox x:Name="DeviceSelector" Height="34" Margin="0,0,12,0" Background="#F8FAFC" Foreground="#0F172A" DisplayMemberPath="Description" SelectionChanged="DeviceSelector_SelectionChanged"/>
         </DockPanel>
+        <WrapPanel Margin="0,10,0,2" Orientation="Horizontal">
+          <Button Content="Restart ADB + Detect Phone" Background="#0F766E" Click="RestartAdb_Click"/>
+          <Button Content="Stop All ADB Services" Background="#9F1239" Click="StopAdb_Click"/>
+        </WrapPanel>
         <TextBlock x:Name="DeviceDetails" Text="No device selected" Foreground="#E2E8F0" Margin="0,12,0,0" TextWrapping="Wrap"/>
         <TextBlock x:Name="PhoneInfoText" Text="Connect a phone to view manufacturer, model, Android version, build, battery and storage." Foreground="#94A3B8" Margin="0,7,0,0" TextWrapping="Wrap"/>
       </StackPanel>
