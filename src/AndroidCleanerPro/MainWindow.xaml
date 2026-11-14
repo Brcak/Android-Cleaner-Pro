@@ -27,6 +27,7 @@
                 <Separator/>
                 <MenuItem Header="Phone _Information..." Click="PhoneInfo_Click"/>
                 <MenuItem Header="_Firmware / Fastboot Tools..." Click="Firmware_Click"/>
+                <MenuItem Header="FRP _Recovery Assistant..." Click="FrpRecovery_Click"/>
                 <MenuItem Header="Reboot into _Recovery..." Click="Recovery_Click"/>
             </MenuItem>
             <MenuItem Header="_Tools">
@@ -54,6 +55,8 @@
                         Background="#0F766E" Padding="12,7"/>
                 <Button Content="⚡  Firmware Tools" Click="Firmware_Click" ToolTip="Read Fastboot device state and carefully flash verified images"
                         Background="#7C3AED" Padding="12,7"/>
+                <Button Content="🔒  FRP Recovery" Click="FrpRecovery_Click" ToolTip="Owner-authorized Factory Reset Protection account recovery guidance"
+                        Background="#334155" Padding="12,7"/>
                 <Button Content="⚙  Settings" Click="Settings_Click" ToolTip="Configure ADB and update preferences"
                         Background="#334155" Padding="12,7"/>
                 <Button Content="↑  Check Updates" Click="Update_Click" ToolTip="Check GitHub Releases for updates"
@@ -103,6 +106,7 @@
       <Button Content="Export JSON Report" Background="#334155" Click="Export_Click"/>
       <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
       <Button Content="Firmware / Flashing" Background="#7C3AED" Click="Firmware_Click"/>
+      <Button Content="FRP Recovery" Background="#334155" Click="FrpRecovery_Click"/>
 
       <Button Content="Reboot Recovery" Background="#7C3AED" Click="Recovery_Click"/>
       <Button Content="Safe Mode Help" Background="#334155" Click="SafeMode_Click"/>
