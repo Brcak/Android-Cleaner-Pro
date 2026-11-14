@@ -14,7 +14,7 @@
                 </Style>
             </Menu.Resources>
             <MenuItem Header="_File">
-                <MenuItem Header="_Export App Report..." Click="Export_Click"/>
+                <MenuItem Header="_Export Visible App Report..." Click="Export_Click"/>
                 <Separator/>
                 <MenuItem Header="_Settings..." Click="Settings_Click"/>
                 <Separator/>
@@ -80,7 +80,7 @@
     </StackPanel>
   </Border>
   <Grid Grid.Column="1" Margin="26,20">
-    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <DockPanel Margin="0,0,0,22">
       <StackPanel DockPanel.Dock="Left"><TextBlock Text="Device Dashboard" FontSize="27" FontWeight="Bold"/><TextBlock Text="Connect an authorized Android device with USB debugging enabled" Foreground="#94A3B8" Margin="0,7,0,0"/></StackPanel>
     </DockPanel>
@@ -103,7 +103,7 @@
       <Button Content="Scan Installed Apps" Click="Scan_Click"/>
       <Button Content="Detect Adware / Popups" Background="#0F766E" Click="Adware_Click"/>
       <Button Content="Uninstall Selected" Background="#B91C1C" Click="Uninstall_Click"/>
-      <Button Content="Export JSON Report" Background="#334155" Click="Export_Click"/>
+      <Button Content="Export Visible JSON" Background="#334155" Click="Export_Click"/>
       <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
       <Button Content="Firmware / Flashing" Background="#7C3AED" Click="Firmware_Click"/>
       <Button Content="FRP Recovery" Background="#334155" Click="FrpRecovery_Click"/>
@@ -112,15 +112,82 @@
       <Button Content="Safe Mode Help" Background="#334155" Click="SafeMode_Click"/>
       <Button Content="Check for Updates" Background="#0F766E" Click="Update_Click"/>
     </WrapPanel>
-    <DataGrid x:Name="PackagesGrid" Grid.Row="3" AlternationCount="2" SelectionMode="Single">
+    <Border Grid.Row="3" Background="#17263B" CornerRadius="10" Padding="12" Margin="0,0,0,11">
+      <StackPanel>
+        <TextBlock Text="APP INVENTORY FILTERS" Foreground="#93C5FD" FontSize="11" FontWeight="Bold" Margin="0,0,0,8"/>
+        <WrapPanel Orientation="Horizontal">
+          <StackPanel Margin="0,0,12,7">
+            <TextBlock Text="Category" Foreground="#A2B4CC" FontSize="11" Margin="0,0,0,4"/>
+            <ComboBox x:Name="InventoryCategoryFilter" Width="165" Height="31" SelectedIndex="0"
+                      Background="#F8FAFC" Foreground="#0F172A"
+                      SelectionChanged="InventoryFilter_Changed">
+              <ComboBoxItem Content="All categories"/>
+              <ComboBoxItem Content="Android / System"/>
+              <ComboBoxItem Content="Google"/>
+              <ComboBoxItem Content="Banking / Finance"/>
+              <ComboBoxItem Content="Samsung"/>
+              <ComboBoxItem Content="Motorola"/>
+              <ComboBoxItem Content="T-Mobile / Metro"/>
+              <ComboBoxItem Content="Other familiar vendors"/>
+              <ComboBoxItem Content="Other apps"/>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Margin="0,0,12,7">
+            <TextBlock Text="App type" Foreground="#A2B4CC" FontSize="11" Margin="0,0,0,4"/>
+            <ComboBox x:Name="InventoryTypeFilter" Width="125" Height="31" SelectedIndex="0"
+                      Background="#F8FAFC" Foreground="#0F172A"
+                      SelectionChanged="InventoryFilter_Changed">
+              <ComboBoxItem Content="All apps"/>
+              <ComboBoxItem Content="User apps"/>
+              <ComboBoxItem Content="System apps"/>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Margin="0,0,12,7">
+            <TextBlock Text="First installed" Foreground="#A2B4CC" FontSize="11" Margin="0,0,0,4"/>
+            <ComboBox x:Name="InventoryAgeFilter" Width="164" Height="31" SelectedIndex="0"
+                      Background="#F8FAFC" Foreground="#0F172A"
+                      SelectionChanged="InventoryFilter_Changed">
+              <ComboBoxItem Content="Any date" Tag="all"/>
+              <ComboBoxItem Content="Within 1 day" Tag="1"/>
+              <ComboBoxItem Content="Within 2 days" Tag="2"/>
+              <ComboBoxItem Content="Within 7 days" Tag="7"/>
+              <ComboBoxItem Content="Within 30 days" Tag="30"/>
+              <ComboBoxItem Content="Date unavailable" Tag="unknown"/>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Margin="0,0,12,7">
+            <TextBlock Text="Search package" Foreground="#A2B4CC" FontSize="11" Margin="0,0,0,4"/>
+            <TextBox x:Name="InventorySearchBox" Width="180" Height="31" Padding="8,4"
+                     Background="#F8FAFC" Foreground="#0F172A"
+                     TextChanged="InventorySearch_Changed"/>
+          </StackPanel>
+        </WrapPanel>
+        <WrapPanel Orientation="Horizontal">
+          <CheckBox x:Name="HideFamiliarCheck" Content="Hide familiar vendor/system categories"
+                    Foreground="#E2E8F0" Margin="0,0,14,4"
+                    Checked="InventoryHide_Changed" Unchecked="InventoryHide_Changed"
+                    ToolTip="Filtering is based on app names, not verified publisher identity or safety."/>
+          <TextBlock x:Name="InventoryCountText" Text="No inventory scanned yet."
+                     Foreground="#94A3B8" FontSize="12" Margin="0,0,0,4"/>
+        </WrapPanel>
+        <TextBlock Text="Category labels are package-name clues, not proof an app is genuine or safe. Install dates come from Android, when reported."
+                   Foreground="#8FA4C0" FontSize="11" TextWrapping="Wrap"/>
+      </StackPanel>
+    </Border>
+    <DataGrid x:Name="PackagesGrid" Grid.Row="4" AlternationCount="2" SelectionMode="Single"
+              HorizontalScrollBarVisibility="Auto">
       <DataGrid.Columns>
-        <DataGridTextColumn Header="App / Package" Binding="{Binding Name}" Width="2*"/>
-        <DataGridTextColumn Header="Installer" Binding="{Binding Installer}" Width="*"/>
-        <DataGridTextColumn Header="Review" Binding="{Binding Risk}" Width="90"/>
-        <DataGridTextColumn Header="Notes" Binding="{Binding Reason}" Width="2*"/>
+        <DataGridTextColumn Header="App / Package" Binding="{Binding Name}" Width="230"/>
+        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="165"/>
+        <DataGridTextColumn Header="Type" Binding="{Binding TypeLabel}" Width="68"/>
+        <DataGridTextColumn Header="First installed" Binding="{Binding InstalledLabel}" Width="145"/>
+        <DataGridTextColumn Header="Last updated" Binding="{Binding UpdatedLabel}" Width="145"/>
+        <DataGridTextColumn Header="Installer" Binding="{Binding Installer}" Width="180"/>
+        <DataGridTextColumn Header="Review" Binding="{Binding Risk}" Width="80"/>
+        <DataGridTextColumn Header="Notes" Binding="{Binding Reason}" Width="280"/>
       </DataGrid.Columns>
     </DataGrid>
-    <TextBlock x:Name="StatusText" Grid.Row="4" Foreground="#94A3B8" Margin="0,12,0,0" Text="Ready. Refresh devices to begin." TextWrapping="Wrap"/>
+    <TextBlock x:Name="StatusText" Grid.Row="5" Foreground="#94A3B8" Margin="0,12,0,0" Text="Ready. Refresh devices to begin." TextWrapping="Wrap"/>
   </Grid>
 </Grid>
 </DockPanel>
