@@ -18,7 +18,7 @@ The main window now includes a conventional **File / Device / Tools / Help** men
 ## Features
 - Device discovery and connection status
 - Phone manufacturer/model, Android version, battery and storage data (when available over ADB)
-- Third-party app inventory and conservative package-name review
+- App inventory with system/user, Google, Samsung, Motorola, T-Mobile, Banking/Finance and familiar-vendor categories, plus package search and installation-age filters (1/2/7/30 days) ([guide](docs/APP_INVENTORY_FILTERS.md)). Category labels are not verification or malware verdicts.
 - **Adware & Suspicious Apps** investigation: overlay permission/AppOps signals, unusual installation sources, adware-related keywords, foreground popup-window capture and short observation, cancellation, and report export ([guide](docs/ADWARE_REVIEW.md))
 - Single-package uninstall with explicit technician confirmation
 - Recovery reboot with confirmation; manual Safe Mode guidance
