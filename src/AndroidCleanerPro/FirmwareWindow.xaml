@@ -64,7 +64,7 @@
                             </WrapPanel>
                             <ComboBox x:Name="FastbootSelector" DisplayMemberPath="Serial"
                                       Height="34" Background="#F8FAFC" Foreground="#0F172A"
-                                      SelectionChanged="FastbootSelector_SelectionChanged"/>
+                                     />
                             <WrapPanel Margin="0,12,0,0">
                                 <Button x:Name="InspectButton" Style="{StaticResource ActionButton}"
                                         Content="Read Bootloader State" Click="Inspect_Click"/>
