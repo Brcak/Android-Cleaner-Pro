@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -13,11 +15,16 @@ public partial class MainWindow : Window
 {
     private readonly AdbService _adb = new();
     private readonly ObservableCollection<PackageInfo> _packages = new();
+    private ICollectionView? _packageView;
     private bool _busy;
     public MainWindow()
     {
         InitializeComponent();
-        PackagesGrid.ItemsSource = _packages;
+        _packageView = CollectionViewSource.GetDefaultView(_packages);
+        _packageView.Filter = IsVisibleInventoryApp;
+        PackagesGrid.ItemsSource = _packageView;
+        _packages.CollectionChanged += (_, _) => UpdateInventoryCount();
+        UpdateInventoryCount();
         VersionText.Text = "v" + (typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "unknown") + " • Native C# / WPF";
         Loaded += async (_, _) =>
         {
@@ -55,6 +62,69 @@ public partial class MainWindow : Window
             MessageBox.Show(this, "Unable to open documentation: " + ex.Message,
                 "Documentation", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+    }
+
+    private void InventoryFilter_Changed(object sender, SelectionChangedEventArgs e)
+        => ApplyInventoryFilters();
+
+    private void InventorySearch_Changed(object sender, TextChangedEventArgs e)
+        => ApplyInventoryFilters();
+
+    private void InventoryHide_Changed(object sender, RoutedEventArgs e)
+        => ApplyInventoryFilters();
+
+    private static string SelectedFilterText(ComboBox? box, string fallback)
+        => (box?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? fallback;
+
+    private bool IsVisibleInventoryApp(object item)
+    {
+        if (item is not PackageInfo app) return false;
+
+        var category = SelectedFilterText(InventoryCategoryFilter, "All categories");
+        if (category != "All categories" && category != app.Category)
+            return false;
+
+        var type = SelectedFilterText(InventoryTypeFilter, "All apps");
+        if (type == "System apps" && !app.IsSystemApp) return false;
+        if (type == "User apps" && app.IsSystemApp) return false;
+
+        // If a category is chosen explicitly, that selection overrides hiding
+        // familiar namespaces so Google/Samsung etc. can still be inspected.
+        if (category == "All categories" && HideFamiliarCheck?.IsChecked == true
+            && app.IsFamiliarCategory)
+            return false;
+
+        var search = InventorySearchBox?.Text?.Trim();
+        if (!string.IsNullOrWhiteSpace(search) &&
+            !app.Name.Contains(search, StringComparison.OrdinalIgnoreCase) &&
+            !app.Category.Contains(search, StringComparison.OrdinalIgnoreCase) &&
+            !app.Installer.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var tag = (InventoryAgeFilter?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "all";
+        if (tag == "unknown") return !app.FirstInstalledUtc.HasValue;
+        if (int.TryParse(tag, out var days))
+        {
+            if (!app.FirstInstalledUtc.HasValue) return false;
+            var elapsed = DateTimeOffset.UtcNow - app.FirstInstalledUtc.Value;
+            if (elapsed < TimeSpan.Zero || elapsed > TimeSpan.FromDays(days))
+                return false;
+        }
+        return true;
+    }
+
+    private void ApplyInventoryFilters()
+    {
+        if (_packageView is null) return;
+        _packageView.Refresh();
+        UpdateInventoryCount();
+    }
+
+    private void UpdateInventoryCount()
+    {
+        if (InventoryCountText is null) return;
+        var visible = _packageView?.Cast<PackageInfo>().Count() ?? 0;
+        InventoryCountText.Text = $"{visible:N0} shown / {_packages.Count:N0} scanned";
     }
 
     private DeviceInfo? SelectedDevice => DeviceSelector.SelectedItem as DeviceInfo;
@@ -209,10 +279,13 @@ public partial class MainWindow : Window
     private async void Scan_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
     {
         var device = RequireDevice();
-        var packages = await _adb.GetPackagesAsync(device.Serial);
+        StatusText.Text = "Reading system and user app inventory. Android install dates may take longer...";
+        var result = await new InventoryService(_adb).ScanAsync(device.Serial);
         _packages.Clear();
-        foreach (var package in packages) _packages.Add(package);
-        StatusText.Text = $"{packages.Count} third-party apps found. Review labels are heuristics, not malware findings.";
+        foreach (var package in result.Packages) _packages.Add(package);
+        ApplyInventoryFilters();
+        StatusText.Text = $"Scanned {result.Packages.Count} Android apps. {result.DateStatus} " +
+                          "Vendor/finance categories are name-based clues, not trusted-app verdicts.";
     });
     private DeviceInfo RequireDevice()
     {
@@ -225,6 +298,8 @@ public partial class MainWindow : Window
         var device = RequireDevice();
         if (PackagesGrid.SelectedItem is not PackageInfo package)
             throw new InvalidOperationException("Select one package first.");
+        if (package.IsSystemApp)
+            throw new InvalidOperationException("System apps cannot be uninstalled through this inventory. Use manufacturer-supported service procedures instead.");
         var answer = MessageBox.Show(this,
             $"Remove {package.Name} for Android user 0 on {device.Serial}? This may delete customer app data. Confirm owner authorization before proceeding.",
             "Confirm package removal", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -238,8 +313,23 @@ public partial class MainWindow : Window
         var device = RequireDevice();
         var dialog = new SaveFileDialog { Filter = "JSON reports (*.json)|*.json", FileName = "android-cleaner-report.json" };
         if (dialog.ShowDialog(this) != true) return;
-        var report = new { timestampUtc = DateTimeOffset.UtcNow, deviceSerial = device.Serial, packages = _packages.ToArray(), note = "Heuristic review only; not a malware diagnosis." };
+        var visible = (_packageView?.Cast<PackageInfo>() ?? Enumerable.Empty<PackageInfo>()).ToArray();
+        var report = new
+        {
+            timestampUtc = DateTimeOffset.UtcNow,
+            deviceSerial = device.Serial,
+            exportedVisibleRowsOnly = true,
+            totalScanned = _packages.Count,
+            visibleCount = visible.Length,
+            categoryFilter = SelectedFilterText(InventoryCategoryFilter, "All categories"),
+            typeFilter = SelectedFilterText(InventoryTypeFilter, "All apps"),
+            installAgeFilter = (InventoryAgeFilter.SelectedItem as ComboBoxItem)?.Content?.ToString(),
+            search = InventorySearchBox.Text,
+            hideFamiliarCategories = HideFamiliarCheck.IsChecked == true,
+            packages = visible,
+            note = "Vendor category is an unverified namespace clue; timestamps are Android-reported. This is not a malware diagnosis."
+        };
         await File.WriteAllTextAsync(dialog.FileName, JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
-        StatusText.Text = $"Report exported to {dialog.FileName}";
+        StatusText.Text = $"Exported {visible.Length} visible inventory rows to {dialog.FileName}";
     });
 }
