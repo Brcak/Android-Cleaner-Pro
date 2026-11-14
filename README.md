@@ -16,11 +16,12 @@ The app checks for newer published GitHub Releases on startup. You can also use 
 - Device discovery and connection status
 - Phone manufacturer/model, Android version, battery and storage data (when available over ADB)
 - Third-party app inventory and conservative package-name review
+- **Adware & Suspicious Apps** investigation: overlay permission/AppOps signals, unusual installation sources, adware-related keywords, foreground popup-window capture and short observation, cancellation, and report export ([guide](docs/ADWARE_REVIEW.md))
 - Single-package uninstall with explicit technician confirmation
 - Recovery reboot with confirmation; manual Safe Mode guidance
 - JSON reports
 
-App icons are not yet implemented. The tool is experimental, not an antivirus product. Package-name flags do not establish malware, and uninstalling can erase app data. Use only with the device owner's permission. Reports contain device identifiers.
+App icons are not yet implemented. Adware indicators and foreground observations are not proof of malware or proof of which app generated an advertisement. The tool is experimental, not an antivirus product. Package-name flags do not establish malware, and uninstalling can erase app data. Use only with the device owner's permission. Reports contain device identifiers.
 
 ## Developers
 Install the .NET 10 SDK on Windows and run `./build-dotnet-windows.ps1`. CI builds and Inno Setup releases use [Windows .NET Build](https://github.com/Brcak/Android-Cleaner-Pro/actions/workflows/windows-dotnet.yml).
