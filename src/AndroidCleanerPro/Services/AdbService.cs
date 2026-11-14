@@ -17,6 +17,14 @@ public sealed class AdbService
     {
         get
         {
+            var configured = SettingsStore.Current.AdbExecutablePath;
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                if (!File.Exists(configured))
+                    throw new InvalidOperationException(
+                        "The custom ADB path no longer exists. Open Tools > Settings and select a valid adb.exe or restore bundled ADB.");
+                return configured;
+            }
             var local = Path.Combine(AppContext.BaseDirectory, "platform-tools", "adb.exe");
             return File.Exists(local) ? local : "adb";
         }
