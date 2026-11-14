@@ -18,6 +18,9 @@ WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
+CloseApplications=yes
+RestartApplications=no
+UsePreviousAppDir=yes
 UninstallDisplayIcon={app}\{#AppExe}
 [Files]
 Source: "..\dist\Windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
