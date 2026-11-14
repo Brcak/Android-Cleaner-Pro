@@ -55,6 +55,10 @@ public sealed class PhoneDetailsService(AdbService adb)
         var model = Prop("ro.product.model", "ro.product.vendor.model");
         var marketedName = Prop("ro.product.marketname", "ro.product.odm.marketname",
             "ro.product.vendor.marketname", "ro.config.marketing_name");
+        // Samsung's published model reference identifies SM-S938 as Galaxy S25 Ultra.
+        // Explicitly label this as a model lookup instead of a device-reported name.
+        if (marketedName == Unknown && model.StartsWith("SM-S938", StringComparison.OrdinalIgnoreCase))
+            marketedName = "Galaxy S25 Ultra (model lookup)";
         var brand = Prop("ro.product.brand", "ro.product.vendor.brand");
         var product = Prop("ro.product.name", "ro.product.vendor.name");
         var codeName = Prop("ro.product.device", "ro.product.vendor.device");
@@ -139,7 +143,8 @@ public sealed class PhoneDetailsService(AdbService adb)
             new("Reported screen pixels", screen),
             new("Reported density (dpi)", density)
         };
-        var heading = manufacturer == Unknown ? model : $"{manufacturer} {model}";
+        var heading = manufacturer == Unknown ? model :
+            marketedName != Unknown ? $"{manufacturer} {marketedName.Replace(" (model lookup)", "")}" : $"{manufacturer} {model}";
         if (heading == Unknown) heading = device.Serial;
 
         return new PhoneDetails(heading, model, android, level,
