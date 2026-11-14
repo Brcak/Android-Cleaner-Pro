@@ -9,6 +9,7 @@ public record DeviceInfo(string Serial, string State, string Description)
     public override string ToString() => $"{Serial} — {State} {Description}";
 }
 public record PackageInfo(string Name, string Installer, string Risk, string Reason);
+public record AdbStopResult(int StoppedProcesses, int BlockedProcesses, string Notes);
 
 public sealed class AdbService
 {
@@ -57,6 +58,56 @@ public sealed class AdbService
             throw new InvalidOperationException("ADB not found. Install Android SDK Platform Tools and add adb to PATH, or put platform-tools beside the application.");
         }
     }
+
+    /// <summary>
+    /// Stop the ADB server and any remaining adb.exe processes accessible to the current
+    /// Windows user. This can interrupt other Android tools using ADB.
+    /// </summary>
+    public async Task<AdbStopResult> StopAllAdbProcessesAsync()
+    {
+        var details = new List<string>();
+        try
+        {
+            await ExecuteAsync(null, "kill-server");
+            details.Add("ADB kill-server command completed.");
+        }
+        catch (Exception ex)
+        {
+            // The ADB binary may be missing or the server may already be stopped.
+            details.Add("ADB kill-server: " + ex.Message);
+        }
+
+        var stopped = 0;
+        var blocked = 0;
+        foreach (var process in Process.GetProcessesByName("adb"))
+        {
+            using (process)
+            {
+                try
+                {
+                    if (process.HasExited) continue;
+                    process.Kill();
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await process.WaitForExitAsync(timeout.Token);
+                    stopped++;
+                }
+                catch (InvalidOperationException)
+                {
+                    // The process exited while stopping it.
+                }
+                catch (Exception ex)
+                {
+                    blocked++;
+                    details.Add($"Could not stop ADB process {process.Id}: {ex.Message}");
+                }
+            }
+        }
+
+        return new AdbStopResult(stopped, blocked, string.Join(" ", details));
+    }
+
+    /// <summary>Start the ADB server; device authorization is still required on the phone.</summary>
+    public Task<string> StartServerAsync() => ExecuteAsync(null, "start-server");
 
     public async Task<IReadOnlyList<DeviceInfo>> GetDevicesAsync()
     {
