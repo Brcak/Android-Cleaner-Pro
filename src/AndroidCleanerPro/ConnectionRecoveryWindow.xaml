@@ -1,0 +1,106 @@
+<Window x:Class="AndroidCleanerPro.ConnectionRecoveryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Connection Recovery | Android Cleaner Pro"
+        Width="890" Height="760" MinWidth="720" MinHeight="570"
+        WindowStartupLocation="CenterOwner"
+        Background="#0B1220" Foreground="#E2E8F0" FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E2E8F0"/></Style>
+        <Style x:Key="Action" TargetType="Button">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Margin" Value="0,0,9,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Background="#111E32" Padding="25,21" BorderBrush="#2A415E" BorderThickness="0,0,0,1">
+            <StackPanel>
+                <TextBlock Text="DEVICE CONNECTION TROUBLESHOOTING" Foreground="#60A5FA"
+                           FontSize="11" FontWeight="Bold"/>
+                <TextBlock Text="Connection Recovery" FontSize="27" FontWeight="Bold" Margin="0,7,0,5"/>
+                <TextBlock Text="Investigate USB/ADB authorization, offline devices and Fastboot access without erasing phone data."
+                           Foreground="#94A3B8" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="25,19">
+                <Border Background="#17263B" CornerRadius="12" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="1. Check device connection" Foreground="#60A5FA" FontSize="16" FontWeight="SemiBold"
+                                   Margin="0,0,0,10"/>
+                        <WrapPanel>
+                            <Button x:Name="CheckButton" Style="{StaticResource Action}" Content="Check ADB + Fastboot"
+                                    Click="Check_Click" Background="#0F766E"/>
+                            <Button x:Name="RestartButton" Style="{StaticResource Action}" Content="Restart ADB Server"
+                                    Click="Restart_Click"/>
+                            <Button Style="{StaticResource Action}" Content="Google USB Driver Guide"
+                                    Click="DriverGuide_Click" Background="#334155"/>
+                        </WrapPanel>
+                        <TextBlock x:Name="StatusText" Text="No connection check performed yet."
+                                   Foreground="#BFDBFE" FontWeight="SemiBold"
+                                   Margin="0,6,0,11" TextWrapping="Wrap"/>
+                        <TextBox x:Name="DeviceListText" IsReadOnly="True" AcceptsReturn="True"
+                                 TextWrapping="Wrap" Height="126"
+                                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                                 FontSize="12" Background="#091626" Foreground="#E2E8F0"
+                                 BorderBrush="#344A67" Padding="11"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#17263B" CornerRadius="12" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="2. Recommended action" Foreground="#60A5FA" FontSize="16"
+                                   FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="RecommendationText"
+                                   Text="Run the connection check to see the recommended next action."
+                                   TextWrapping="Wrap" FontSize="13" LineHeight="23"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#17263B" CornerRadius="12" Padding="18" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="3. When malware blocks Settings" Foreground="#60A5FA"
+                                   FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Boot into Android Safe Mode using the phone's supported physical button or power-menu method. This temporarily disables most third-party apps and may let the owner reopen Settings, enable Developer options/USB debugging, and approve the computer."
+                                   TextWrapping="Wrap" LineHeight="22" Margin="0,0,0,11"/>
+                        <TextBlock Text="Safe Mode does not automatically authorize ADB. If USB debugging was off or this PC has never been trusted, the phone still requires on-device approval. Do not erase or flash customer data merely to establish an ADB connection."
+                                   Foreground="#FBBF24" TextWrapping="Wrap" LineHeight="21" Margin="0,0,0,12"/>
+                        <WrapPanel>
+                            <Button Style="{StaticResource Action}" Content="Motorola Safe Mode Guide"
+                                    Click="MotorolaGuide_Click" Background="#334155"/>
+                            <Button Style="{StaticResource Action}" Content="Official ADB Documentation"
+                                    Click="AdbGuide_Click" Background="#334155"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+                <Border Background="#17263B" CornerRadius="12" Padding="18">
+                    <StackPanel>
+                        <TextBlock Text="Understanding recovery modes" Foreground="#60A5FA"
+                                   FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Fastboot / bootloader: Can be detected separately from ADB on supported Android phones, but does not grant access to installed apps or customer files."
+                                   TextWrapping="Wrap" Margin="0,0,0,10"/>
+                        <TextBlock Text="Android Recovery / sideload: Usually limited to recovery tasks or installing signed OTA packages. Standard app scanning, uninstall and full ADB shell access are unavailable in sideload mode."
+                                   TextWrapping="Wrap" Margin="0,0,0,10"/>
+                        <TextBlock Text="Samsung Download Mode: Not Fastboot. Use manufacturer-supported recovery diagnostics; this tool does not bypass Samsung security controls."
+                                   TextWrapping="Wrap" Foreground="#FBBF24"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Row="2" Background="#111E32" Padding="20,12" BorderBrush="#2A415E" BorderThickness="0,1,0,0">
+            <DockPanel LastChildFill="True">
+                <Button DockPanel.Dock="Right" Style="{StaticResource Action}"
+                        Content="Close" Background="#334155" Click="Close_Click" Margin="0"/>
+                <TextBlock Text="No root, FRP bypass, unauthorized pairing or forced debugging commands."
+                           Foreground="#94A3B8" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
