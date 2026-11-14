@@ -1,0 +1,74 @@
+<Window x:Class="AndroidCleanerPro.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings | Android Cleaner Pro" Width="710" Height="535"
+        MinWidth="620" MinHeight="480" ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner" Background="#0B1220"
+        Foreground="#E2E8F0" FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E2E8F0"/></Style>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="14,9"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <Border Grid.Row="0" Padding="25,21" Background="#111E32">
+            <StackPanel>
+                <TextBlock Text="Settings" FontSize="26" FontWeight="SemiBold"/>
+                <TextBlock Text="Configure Android Cleaner Pro for this Windows user."
+                           Margin="0,6,0,0" Foreground="#94A3B8"/>
+            </StackPanel>
+        </Border>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="25,22">
+                <Border Background="#17263B" Padding="18" CornerRadius="12" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="Software Updates" FontSize="16" FontWeight="SemiBold" Foreground="#60A5FA"/>
+                        <CheckBox x:Name="AutoUpdateCheck" Content="Check for new releases when Android Cleaner Pro starts"
+                                  Foreground="#E2E8F0" Margin="0,14,0,8"/>
+                        <TextBlock Text="Checks are optional. Any available update still requires your approval and runs the regular Windows installer."
+                                   Foreground="#A2B4CC" TextWrapping="Wrap" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#17263B" Padding="18" CornerRadius="12" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Android Debug Bridge (ADB)" FontSize="16" FontWeight="SemiBold" Foreground="#60A5FA"/>
+                        <TextBlock Text="By default, use the ADB bundled with Android Cleaner Pro. Set a custom adb.exe only when another Android tool requires a particular version."
+                                   Foreground="#A2B4CC" TextWrapping="Wrap" Margin="0,10,0,12" FontSize="12"/>
+                        <TextBlock Text="Optional custom adb.exe path" Margin="0,0,0,7" FontWeight="Medium"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <TextBox x:Name="AdbPathBox" Grid.Column="0" Background="#0D192A" Foreground="White"
+                                     Padding="9" BorderBrush="#38506F" VerticalContentAlignment="Center"/>
+                            <Button Grid.Column="1" Content="Browse..." Click="Browse_Click" Margin="10,0,0,0"
+                                    Style="{StaticResource ActionButton}" Background="#334155"/>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="Test current ADB" Click="TestAdb_Click" Style="{StaticResource ActionButton}"/>
+                            <Button Content="Use bundled ADB" Click="DefaultAdb_Click" Margin="10,0,0,0"
+                                    Style="{StaticResource ActionButton}" Background="#334155"/>
+                        </StackPanel>
+                        <TextBlock x:Name="TestResult" Text="" Foreground="#A2B4CC" TextWrapping="Wrap" Margin="0,9,0,0"/>
+                        <TextBlock Text="Changing ADB does not install USB drivers or override phone USB debugging authorization."
+                                   Foreground="#8197B4" FontSize="11" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </Border>
+                <TextBlock Text="Preferences are stored locally in %LOCALAPPDATA%\AndroidCleanerPro\settings.json. No customer device identifiers are saved here."
+                           FontSize="11" Foreground="#8197B4" TextWrapping="Wrap"/>
+            </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Row="2" Background="#111E32" Padding="22,14" BorderBrush="#283B56" BorderThickness="0,1,0,0">
+            <DockPanel LastChildFill="False">
+                <Button Content="Cancel" DockPanel.Dock="Right" Style="{StaticResource ActionButton}"
+                        Background="#334155" Click="Cancel_Click" Margin="10,0,0,0"/>
+                <Button Content="Save Settings" DockPanel.Dock="Right" Style="{StaticResource ActionButton}"
+                        Click="Save_Click"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
