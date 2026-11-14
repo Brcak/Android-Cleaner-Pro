@@ -139,6 +139,18 @@ public partial class MainWindow : Window
     }
     private async void Update_Click(object sender, RoutedEventArgs e)
         => await UpdateService.CheckAndOfferAsync(this, manual: true);
+    private void Adware_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        if (SelectedDevice is not { State: "device" } device)
+        {
+            MessageBox.Show(this, "Connect and authorize a phone first, then click Refresh Devices.",
+                "Adware & Suspicious Apps", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        var window = new AdwareScanWindow(_adb, device) { Owner = this };
+        window.ShowDialog();
+    }
     private async void Scan_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
     {
         var device = RequireDevice();
