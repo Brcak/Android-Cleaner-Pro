@@ -10,6 +10,9 @@
     <Version Condition="'$(Version)' == ''">0.3.0</Version>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.10" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Assets\AndroidCleanerPro.ico" />
   </ItemGroup>
 </Project>
