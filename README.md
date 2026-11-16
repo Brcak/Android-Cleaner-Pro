@@ -21,6 +21,7 @@ The main window now includes a conventional **File / Device / Tools / Help** men
 - Phone manufacturer/model, Android version, battery and storage data (when available over ADB)
 - App inventory with system/user, Google, Samsung, Motorola, T-Mobile, Banking/Finance and familiar-vendor categories, plus package search and installation-age filters (1/2/7/30 days) ([guide](docs/APP_INVENTORY_FILTERS.md)). Category labels are not verification or malware verdicts.
 - **Adware & Suspicious Apps** investigation: overlay permission/AppOps signals, unusual installation sources, adware-related keywords, foreground popup-window capture and short observation, cancellation, and report export ([guide](docs/ADWARE_REVIEW.md))
+- **Hazard App Database**: a private local SQLite log of technician hazard/review markings and success/failure records for app removals performed in the tool, with JSON export ([guide](docs/HAZARD_DATABASE.md)).
 - Single-package uninstall with explicit technician confirmation
 - Recovery reboot with confirmation; manual Safe Mode guidance
 - **Firmware / Fastboot Tools**: detect Fastboot devices, inspect bootloader state and verify firmware image checksums; limited, manually confirmed single-partition flashing only for already-unlocked compatible devices ([guide](docs/FIRMWARE_FLASHING.md)). Samsung Odin/Download Mode flashing is not implemented.
