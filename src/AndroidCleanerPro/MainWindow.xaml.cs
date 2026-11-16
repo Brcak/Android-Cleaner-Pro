@@ -352,6 +352,15 @@ public partial class MainWindow : Window
         window.ShowDialog();
     }
 
+    private void HazardDatabase_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        var selected = PackagesGrid.SelectedItem as PackageInfo;
+        var dialog = new HazardDatabaseWindow(selected?.Name,
+            selected?.Risk == "Review" ? selected.Reason : null) { Owner = this };
+        dialog.ShowDialog();
+    }
+
     private void Adware_Click(object sender, RoutedEventArgs e)
     {
         NavigateTo(NavigationPage.Security);
@@ -399,9 +408,25 @@ public partial class MainWindow : Window
             $"Remove {package.Name} for Android user 0 on {device.Serial}? This may delete customer app data. Confirm owner authorization before proceeding.",
             "Confirm package removal", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
-        var result = await _adb.UninstallAsync(device.Serial, package.Name);
-        _packages.Remove(package);
-        StatusText.Text = $"{package.Name}: {result}";
+        try
+        {
+            var result = await _adb.UninstallAsync(device.Serial, package.Name);
+            _packages.Remove(package);
+            HazardDatabase.RecordRemoval(package.Name, device.Serial, "App Inventory", true, result);
+            StatusText.Text = $"{package.Name}: {result}. Successful removal recorded in Hazard Database.";
+        }
+        catch (Exception ex)
+        {
+            // Attempted removal and failed removal are different audit outcomes.
+            // Failed actions never silently become confirmed malware classifications.
+            try { HazardDatabase.RecordRemoval(package.Name, device.Serial, "App Inventory", false, ex.Message); }
+            catch (Exception logEx)
+            {
+                throw new InvalidOperationException(
+                    $"Uninstall failed: {ex.Message}. The audit database also failed: {logEx.Message}", ex);
+            }
+            throw;
+        }
     });
     private async void Export_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
     {
