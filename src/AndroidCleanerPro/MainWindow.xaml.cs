@@ -408,17 +408,14 @@ public partial class MainWindow : Window
             $"Remove {package.Name} for Android user 0 on {device.Serial}? This may delete customer app data. Confirm owner authorization before proceeding.",
             "Confirm package removal", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
+        string result;
         try
         {
-            var result = await _adb.UninstallAsync(device.Serial, package.Name);
-            _packages.Remove(package);
-            HazardDatabase.RecordRemoval(package.Name, device.Serial, "App Inventory", true, result);
-            StatusText.Text = $"{package.Name}: {result}. Successful removal recorded in Hazard Database.";
+            result = await _adb.UninstallAsync(device.Serial, package.Name);
         }
         catch (Exception ex)
         {
-            // Attempted removal and failed removal are different audit outcomes.
-            // Failed actions never silently become confirmed malware classifications.
+            // Log a failed ADB operation distinctly from successful removal.
             try { HazardDatabase.RecordRemoval(package.Name, device.Serial, "App Inventory", false, ex.Message); }
             catch (Exception logEx)
             {
@@ -427,6 +424,10 @@ public partial class MainWindow : Window
             }
             throw;
         }
+        _packages.Remove(package);
+        // Do not silently continue if the app was removed but audit persistence failed.
+        HazardDatabase.RecordRemoval(package.Name, device.Serial, "App Inventory", true, result);
+        StatusText.Text = $"{package.Name}: {result}. Successful removal recorded in Hazard Database.";
     });
     private async void Export_Click(object sender, RoutedEventArgs e) => await RunAsync(async () =>
     {
