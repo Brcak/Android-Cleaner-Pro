@@ -169,6 +169,16 @@ public partial class AdwareScanWindow : Window
         }
     }
 
+    private void Hazard_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        var item = FindingsGrid.SelectedItem as AdwareFinding;
+        var reason = item is null ? null :
+            $"{item.Priority}: {item.Indicators}. {item.Explanation}";
+        var dialog = new HazardDatabaseWindow(item?.Package, reason) { Owner = this };
+        dialog.ShowDialog();
+    }
+
     private async void Remove_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
@@ -190,9 +200,30 @@ public partial class AdwareScanWindow : Window
         SetBusy(true);
         try
         {
-            var result = await _adb.UninstallAsync(_device.Serial, finding.Package);
+            string result;
+            try
+            {
+                result = await _adb.UninstallAsync(_device.Serial, finding.Package);
+            }
+            catch (Exception uninstallError)
+            {
+                try
+                {
+                    HazardDatabase.RecordRemoval(finding.Package, _device.Serial,
+                        "Adware Scanner", false, uninstallError.Message);
+                }
+                catch (Exception logError)
+                {
+                    throw new InvalidOperationException(
+                        $"Uninstall failed: {uninstallError.Message}. Audit recording also failed: {logError.Message}",
+                        uninstallError);
+                }
+                throw;
+            }
             _findings.Remove(finding);
-            StatusText.Text = $"Uninstall result: {result} — {finding.Package}";
+            HazardDatabase.RecordRemoval(finding.Package, _device.Serial,
+                "Adware Scanner", true, result);
+            StatusText.Text = $"Uninstall result: {result} — {finding.Package}. Saved in Hazard Database.";
         }
         catch (Exception ex)
         {
