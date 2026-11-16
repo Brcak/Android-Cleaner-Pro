@@ -1,0 +1,114 @@
+<Window x:Class="AndroidCleanerPro.HazardDatabaseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hazard App Database | Android Cleaner Pro"
+        Width="1130" Height="810" MinWidth="880" MinHeight="630"
+        WindowStartupLocation="CenterOwner" Background="#0B1220"
+        Foreground="#E2E8F0" FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E2E8F0"/></Style>
+        <Style x:Key="Action" TargetType="Button">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="14,9"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0,0,9,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="#112238"/>
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+            <Setter Property="RowBackground" Value="#112238"/>
+            <Setter Property="AlternatingRowBackground" Value="#1A2D45"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0,0,0,13">
+            <TextBlock Text="LOCAL SECURITY RECORDS" Foreground="#60A5FA" FontWeight="Bold" FontSize="11"/>
+            <TextBlock Text="Hazard App Database" FontSize="27" FontWeight="Bold" Margin="0,6,0,5"/>
+            <TextBlock Text="Track reviewed app packages, technician hazard markings and actual uninstall outcomes. All records stay on this Windows PC."
+                       Foreground="#93A9C3" TextWrapping="Wrap"/>
+        </StackPanel>
+        <Border Grid.Row="1" Background="#18283E" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Mark or review an app" Foreground="#60A5FA" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,11"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="13"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Android package name" FontSize="11" Foreground="#93A9C3" Margin="0,0,0,4"/>
+                        <TextBox x:Name="PackageBox" Background="#071321" Foreground="White"
+                                 BorderBrush="#3E5673" Padding="9"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Technician classification" FontSize="11" Foreground="#93A9C3" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="StatusBox" Background="#F8FAFC" Foreground="#0F172A" Height="34" SelectedIndex="0">
+                            <ComboBoxItem Content="Review"/>
+                            <ComboBoxItem Content="Confirmed by technician"/>
+                            <ComboBoxItem Content="Cleared"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+                <TextBlock Text="Observed behavior / evidence (required)" FontSize="11" Foreground="#93A9C3" Margin="0,12,0,4"/>
+                <TextBox x:Name="ReasonBox" Background="#071321" Foreground="White"
+                         BorderBrush="#3E5673" TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" Height="65" Padding="9"/>
+                <WrapPanel Margin="0,11,0,0">
+                    <Button Content="Save Review Marking" Style="{StaticResource Action}" Click="Mark_Click"/>
+                    <Button Content="Refresh Records" Style="{StaticResource Action}" Background="#334155" Click="Refresh_Click"/>
+                    <Button Content="Export JSON History" Style="{StaticResource Action}" Background="#0F766E" Click="Export_Click"/>
+                </WrapPanel>
+                <TextBlock Text="A technician marking is an opinion, not independent malware verification. Uninstallation does not automatically mark a package hazardous."
+                           Foreground="#FBBF24" TextWrapping="Wrap" FontSize="11"/>
+            </StackPanel>
+        </Border>
+        <TextBlock Grid.Row="2" x:Name="CountText" Text="Loading records..."
+                   Foreground="#94A3B8" Margin="0,0,0,8"/>
+        <TabControl Grid.Row="3" Background="#162439" Foreground="#E2E8F0">
+            <TabItem Header="Hazard / Review Markings">
+                <DataGrid x:Name="HazardsGrid" SelectionChanged="HazardsGrid_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Package" Binding="{Binding PackageName}" Width="2*"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="160"/>
+                        <DataGridTextColumn Header="Reason / evidence" Binding="{Binding Reason}" Width="2*"/>
+                        <DataGridTextColumn Header="Uninstall attempts" Binding="{Binding Attempts}" Width="115"/>
+                        <DataGridTextColumn Header="Successes" Binding="{Binding Successes}" Width="75"/>
+                        <DataGridTextColumn Header="Last result" Binding="{Binding LastResult}" Width="100"/>
+                        <DataGridTextColumn Header="Reviewed UTC" Binding="{Binding UpdatedUtc}" Width="190"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Uninstall History">
+                <DataGrid x:Name="HistoryGrid">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="UTC time" Binding="{Binding TimeUtc}" Width="190"/>
+                        <DataGridTextColumn Header="Package" Binding="{Binding PackageName}" Width="2*"/>
+                        <DataGridTextColumn Header="Device code" Binding="{Binding DeviceCode}" Width="135"/>
+                        <DataGridTextColumn Header="Source" Binding="{Binding Origin}" Width="100"/>
+                        <DataGridTextColumn Header="Outcome" Binding="{Binding Result}" Width="80"/>
+                        <DataGridTextColumn Header="ADB result / error" Binding="{Binding Detail}" Width="2*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+        <DockPanel Grid.Row="4" Margin="0,10,0,0">
+            <Button DockPanel.Dock="Right" Content="Close" Style="{StaticResource Action}"
+                    Background="#334155" Margin="0" Click="Close_Click"/>
+            <TextBlock x:Name="DatabasePathText" Foreground="#8098B6"
+                       VerticalAlignment="Center" FontSize="11" TextWrapping="Wrap"/>
+        </DockPanel>
+    </Grid>
+</Window>
