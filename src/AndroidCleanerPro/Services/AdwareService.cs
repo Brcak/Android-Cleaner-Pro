@@ -92,7 +92,7 @@ public sealed class AdwareService(AdbService adb)
             };
             results.Add(finding);
             var done = Interlocked.Increment(ref completed);
-            progress?.Report(new AdwareScanProgress(done, packages.Count, finding));
+            progress?.Report(new AdwareScanProgress(done, packages.Length, finding));
         });
 
         return results.OrderByDescending(f => f.Score).ThenBy(f => f.Package).ToArray();
