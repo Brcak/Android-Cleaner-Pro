@@ -75,16 +75,10 @@
                 <Button Content="▤  Repair Jobs" Click="RepairCases_Click" ToolTip="Local technician job notes and before/after reports" Background="#334155" Padding="12,7"/>
                 <Button Content="⚠  Hazard Database" Click="HazardDatabase_Click" ToolTip="Review app hazard labels and uninstall audit history"
                         Background="#334155" Padding="12,7"/>
-                <Button Content="⚡  Firmware Tools" Click="Firmware_Click" ToolTip="Read Fastboot device state and carefully flash verified images"
-                        Background="#7C3AED" Padding="12,7"/>
-                <Button Content="🔒  FRP Recovery" Click="FrpRecovery_Click" ToolTip="Owner-authorized Factory Reset Protection account recovery guidance"
-                        Background="#334155" Padding="12,7"/>
+
                 <Button Content="⚙  Settings" Click="Settings_Click" ToolTip="Configure ADB and update preferences"
                         Background="#334155" Padding="12,7"/>
-                <Button Content="↑  Check Updates" Click="Update_Click" ToolTip="Check GitHub Releases for updates"
-                        Background="#334155" Padding="12,7"/>
-                <Button Content="ⓘ  About" Click="About_Click" ToolTip="Program information and resources"
-                        Background="#334155" Padding="12,7"/>
+
             </WrapPanel>
         </Border>
     </StackPanel>
@@ -140,13 +134,6 @@
       <Button Content="Uninstall Selected" Background="#B91C1C" Click="Uninstall_Click"/>
       <Button Content="Hazard Database" Background="#334155" Click="HazardDatabase_Click"/>
       <Button Content="Export Visible JSON" Background="#334155" Click="Export_Click"/>
-      <Button Content="Phone Info" Background="#334155" Click="PhoneInfo_Click"/>
-      <Button Content="Firmware / Flashing" Background="#7C3AED" Click="Firmware_Click"/>
-      <Button Content="FRP Recovery" Background="#334155" Click="FrpRecovery_Click"/>
-
-      <Button Content="Reboot Recovery" Background="#7C3AED" Click="Recovery_Click"/>
-      <Button Content="Safe Mode Help" Background="#334155" Click="SafeMode_Click"/>
-      <Button Content="Check for Updates" Background="#0F766E" Click="Update_Click"/>
     </WrapPanel>
     <Border x:Name="InventoryFiltersPanel" Grid.Row="3" Background="#17263B" CornerRadius="10" Padding="12" Margin="0,0,0,11">
       <StackPanel>
