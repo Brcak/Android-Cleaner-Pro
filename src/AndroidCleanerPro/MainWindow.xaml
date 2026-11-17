@@ -45,6 +45,7 @@
             <MenuItem Header="_Tools">
                 <MenuItem Header="Scan Installed _Apps" Click="Scan_Click"/>
                 <MenuItem Header="Detect _Adware / Popups..." Click="Adware_Click"/>
+                <MenuItem Header="_Android Log Viewer..." Click="Logcat_Click"/>
                 <MenuItem Header="_Hazard App Database..." Click="HazardDatabase_Click"/>
                 <MenuItem Header="_Firmware / Fastboot Tools..." Click="Firmware_Click"/>
                 <MenuItem Header="_Safe Mode Help..." Click="SafeMode_Click"/>
@@ -67,6 +68,7 @@
                         Background="#334155" Padding="12,7"/>
                 <Button Content="▣  Phone Info" Click="PhoneInfo_Click" ToolTip="Detailed phone information"
                         Background="#334155" Padding="12,7"/>
+                <Button Content="≡  Log Viewer" Click="Logcat_Click" ToolTip="Inspect read-only Android system logs" Background="#334155" Padding="12,7"/>
                 <Button Content="⬡  Adware Scan" Click="Adware_Click" ToolTip="Investigate suspicious apps and popups"
                         Background="#0F766E" Padding="12,7"/>
                 <Button Content="⚠  Hazard Database" Click="HazardDatabase_Click" ToolTip="Review app hazard labels and uninstall audit history"
@@ -228,6 +230,7 @@
                      TextWrapping="Wrap" Foreground="#A9BED8" Margin="0,0,0,20"/>
           <WrapPanel>
             <Button Content="Open Hazard Database" Background="#334155" Click="HazardDatabase_Click" Padding="18,12"/>
+            <Button Content="Open Android Log Viewer" Background="#334155" Click="Logcat_Click" Padding="18,12"/>
             <Button Content="Open Adware / Popup Scanner" Background="#0F766E"
                     Click="Adware_Click" Padding="18,12"/>
             <Button Content="Safe Mode Instructions" Background="#334155"
