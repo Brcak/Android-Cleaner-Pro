@@ -50,10 +50,46 @@
             <Button x:Name="WatchButton" Style="{StaticResource ToolButton}" Content="Watch Foreground (15s)" Background="#0F766E" Click="Watch_Click"/>
             <Button x:Name="RemoveButton" Style="{StaticResource ToolButton}" Content="Uninstall Selected" Background="#B91C1C" Click="Remove_Click"/>
             <Button x:Name="ExportButton" Style="{StaticResource ToolButton}" Content="Export Findings" Background="#334155" Click="Export_Click"/>
+            <Button x:Name="OpenHazardDbButton" Style="{StaticResource ToolButton}" Content="Hazard DB" Background="#334155" Click="Hazard_Click"/>
             <Button x:Name="HazardButton" Style="{StaticResource ToolButton}" Content="Mark / View Hazard DB" Background="#7C3AED" Click="Hazard_Click"/>
         </WrapPanel>
 
         <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <WrapPanel Margin="0,0,0,8">
+                <StackPanel Margin="0,0,16,4">
+                    <TextBlock Text="First installed" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="AgeFilterBox" Width="160" Height="30"
+                              Background="#F8FAFC" Foreground="#0F172A"
+                              SelectedIndex="0" SelectionChanged="Filter_Changed">
+                        <ComboBoxItem Content="Any date" Tag="all"/>
+                        <ComboBoxItem Content="Last 24 hours" Tag="1"/>
+                        <ComboBoxItem Content="Last 48 hours" Tag="2"/>
+                        <ComboBoxItem Content="Last 7 days" Tag="7"/>
+                        <ComboBoxItem Content="Last 30 days" Tag="30"/>
+                        <ComboBoxItem Content="Date unavailable" Tag="unknown"/>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Margin="0,0,16,4">
+                    <TextBlock Text="Review priority" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="PriorityFilterBox" Width="180" Height="30"
+                              Background="#F8FAFC" Foreground="#0F172A"
+                              SelectedIndex="0" SelectionChanged="Filter_Changed">
+                        <ComboBoxItem Content="All findings"/>
+                        <ComboBoxItem Content="Elevated review"/>
+                        <ComboBoxItem Content="Review"/>
+                        <ComboBoxItem Content="Weak signal"/>
+                        <ComboBoxItem Content="No indicators"/>
+                        <ComboBoxItem Content="Incomplete"/>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Margin="0,0,16,4">
+                    <TextBlock Text="Find package or indicator" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                    <TextBox x:Name="FilterSearchBox" Width="210" Height="30" Padding="8,4"
+                             Background="#F8FAFC" Foreground="#0F172A"
+                             TextChanged="Search_Changed"/>
+                </StackPanel>
+                <TextBlock x:Name="FilteredCountText" Foreground="#BFDBFE" FontSize="12" VerticalAlignment="Center"/>
+            </WrapPanel>
             <ProgressBar x:Name="ScanProgress" Height="7" Minimum="0" Maximum="100" Value="0"
                          Background="#1C3048" Foreground="#38BDF8"/>
             <TextBlock x:Name="StatusText" Foreground="#A4B8D3" Margin="0,7,0,0"
@@ -68,8 +104,11 @@
             <DataGrid x:Name="FindingsGrid" Grid.Column="0" AlternationCount="2" SelectionChanged="FindingsGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="App package" Binding="{Binding Package}" Width="2*"/>
+                    <DataGridTextColumn Header="First installed" Binding="{Binding InstalledLabel}" Width="135"/>
+                    <DataGridTextColumn Header="Category (name only)" Binding="{Binding Category}" Width="135"/>
                     <DataGridTextColumn Header="Review priority" Binding="{Binding Priority}" Width="105"/>
                     <DataGridTextColumn Header="Score" Binding="{Binding Score}" Width="55"/>
+                    <DataGridTextColumn Header="Evidence" Binding="{Binding EvidenceConfidence}" Width="145"/>
                     <DataGridTextColumn Header="Indicators" Binding="{Binding Indicators}" Width="2*"/>
                 </DataGrid.Columns>
             </DataGrid>
@@ -80,6 +119,10 @@
                         <TextBlock x:Name="SelectedPackage" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"/>
                         <TextBlock Text="Installer" Foreground="#94A3B8" Margin="0,16,0,4"/>
                         <TextBlock x:Name="SelectedInstaller" TextWrapping="Wrap"/>
+                        <TextBlock Text="Evidence strength" Foreground="#94A3B8" Margin="0,16,0,4"/>
+                        <TextBlock x:Name="SelectedConfidence" TextWrapping="Wrap"/>
+                        <TextBlock Text="First installed" Foreground="#94A3B8" Margin="0,16,0,4"/>
+                        <TextBlock x:Name="SelectedInstallDate" TextWrapping="Wrap"/>
                         <TextBlock Text="Why it was flagged" Foreground="#94A3B8" Margin="0,16,0,4"/>
                         <TextBlock x:Name="SelectedExplanation" TextWrapping="Wrap" FontSize="12"/>
                         <TextBlock Text="No automatic removals. Review app identity and behavior with the owner."
