@@ -361,6 +361,18 @@ public partial class MainWindow : Window
         dialog.ShowDialog();
     }
 
+    private void Logcat_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        if (SelectedDevice is not { State: "device" } device)
+        {
+            MessageBox.Show(this, "Connect and authorize an Android phone to read its system logs.",
+                "Android Log Viewer", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        new LogcatWindow(_adb, device.Serial) { Owner = this }.ShowDialog();
+    }
+
     private void Adware_Click(object sender, RoutedEventArgs e)
     {
         NavigateTo(NavigationPage.Security);
