@@ -361,6 +361,13 @@ public partial class MainWindow : Window
         dialog.ShowDialog();
     }
 
+    private void RepairCases_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        // No customer identifier is collected automatically.
+        new RepairCasesWindow { Owner = this }.ShowDialog();
+    }
+
     private void Logcat_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
