@@ -46,6 +46,7 @@
                 <MenuItem Header="Scan Installed _Apps" Click="Scan_Click"/>
                 <MenuItem Header="Detect _Adware / Popups..." Click="Adware_Click"/>
                 <MenuItem Header="_Android Log Viewer..." Click="Logcat_Click"/>
+                <MenuItem Header="_Repair Job Records..." Click="RepairCases_Click"/>
                 <MenuItem Header="_Hazard App Database..." Click="HazardDatabase_Click"/>
                 <MenuItem Header="_Firmware / Fastboot Tools..." Click="Firmware_Click"/>
                 <MenuItem Header="_Safe Mode Help..." Click="SafeMode_Click"/>
@@ -71,6 +72,7 @@
                 <Button Content="≡  Log Viewer" Click="Logcat_Click" ToolTip="Inspect read-only Android system logs" Background="#334155" Padding="12,7"/>
                 <Button Content="⬡  Adware Scan" Click="Adware_Click" ToolTip="Investigate suspicious apps and popups"
                         Background="#0F766E" Padding="12,7"/>
+                <Button Content="▤  Repair Jobs" Click="RepairCases_Click" ToolTip="Local technician job notes and before/after reports" Background="#334155" Padding="12,7"/>
                 <Button Content="⚠  Hazard Database" Click="HazardDatabase_Click" ToolTip="Review app hazard labels and uninstall audit history"
                         Background="#334155" Padding="12,7"/>
                 <Button Content="⚡  Firmware Tools" Click="Firmware_Click" ToolTip="Read Fastboot device state and carefully flash verified images"
@@ -253,6 +255,7 @@
           <WrapPanel>
             <Button Content="Export Visible Apps to JSON…" Background="#0F766E"
                     Click="Export_Click" Padding="18,12"/>
+            <Button Content="Repair Records / Before-After Reports" Background="#334155" Click="RepairCases_Click" Padding="18,12"/>
             <Button Content="View and Filter Apps" Background="#334155"
                     Click="InventoryNav_Click" Padding="18,12"/>
           </WrapPanel>
