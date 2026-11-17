@@ -9,7 +9,16 @@ public sealed record AdwareFinding(
     string Priority,
     int Score,
     string Indicators,
-    string Explanation);
+    string Explanation)
+{
+    public string Category { get; init; } = "Other apps";
+    public DateTimeOffset? FirstInstalledUtc { get; init; }
+    public string InstalledLabel => FirstInstalledUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "Not reported";
+    public bool AccessibilityEnabled { get; init; }
+    public bool NotificationAccessEnabled { get; init; }
+    public bool OverlayAllowed { get; init; }
+    public string EvidenceConfidence { get; init; } = "Low";
+}
 
 public sealed record AdwareScanProgress(
     int Finished,
@@ -46,8 +55,14 @@ public sealed class AdwareService(AdbService adb)
         IProgress<AdwareScanProgress>? progress,
         CancellationToken cancellationToken)
     {
-        // Inventory only third-party apps; no modifications or root required.
-        var packages = await adb.GetPackagesAsync(serial);
+        // The full inventory provides Android-reported install dates and excludes
+        // system apps without trusting vendor-looking package names.
+        var inventory = await new InventoryService(adb).ScanAsync(serial);
+        var packages = inventory.Packages.Where(p => !p.IsSystemApp).ToArray();
+        var enabledAccessibility = await ReadEnabledPackagesAsync(
+            serial, "enabled_accessibility_services");
+        var enabledListeners = await ReadEnabledPackagesAsync(
+            serial, "enabled_notification_listeners");
         var results = new ConcurrentBag<AdwareFinding>();
         var completed = 0;
 
@@ -62,7 +77,7 @@ public sealed class AdwareService(AdbService adb)
             AdwareFinding finding;
             try
             {
-                finding = await InspectAsync(serial, package, token);
+                finding = await InspectAsync(serial, package, enabledAccessibility, enabledListeners, token);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -70,6 +85,11 @@ public sealed class AdwareService(AdbService adb)
                     "Incomplete", 0, "Inspection unavailable",
                     "Could not inspect this app: " + ex.Message);
             }
+            finding = finding with
+            {
+                Category = package.Category,
+                FirstInstalledUtc = package.FirstInstalledUtc
+            };
             results.Add(finding);
             var done = Interlocked.Increment(ref completed);
             progress?.Report(new AdwareScanProgress(done, packages.Count, finding));
@@ -81,6 +101,8 @@ public sealed class AdwareService(AdbService adb)
     private async Task<AdwareFinding> InspectAsync(
         string serial,
         PackageInfo package,
+        IReadOnlySet<string> enabledAccessibility,
+        IReadOnlySet<string> enabledListeners,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -122,6 +144,24 @@ public sealed class AdwareService(AdbService adb)
         }
         token.ThrowIfCancellationRequested();
 
+        // Explicit Android secure settings list enabled services, rather than
+        // merely declaring their availability in an APK manifest.
+        var accessibilityActive = enabledAccessibility.Contains(name);
+        var listenerActive = enabledListeners.Contains(name);
+        if (accessibilityActive)
+        {
+            score += 4;
+            indicators.Add("Accessibility ENABLED");
+            explanation.Add("Android secure settings currently list an enabled accessibility service owned by this package.");
+        }
+        if (listenerActive)
+        {
+            score += 2;
+            indicators.Add("Notification listener ENABLED");
+            explanation.Add("Android secure settings list an enabled notification listener for this package.");
+        }
+        var overlayAllowed = false;
+
         // These are package dump references, not proof of permission grants or misuse.
         if (dump.Contains("android.permission.SYSTEM_ALERT_WINDOW", StringComparison.Ordinal))
         {
@@ -135,8 +175,9 @@ public sealed class AdwareService(AdbService adb)
                     "get", name, "SYSTEM_ALERT_WINDOW");
                 if (Regex.IsMatch(appOps, @"(?im)SYSTEM_ALERT_WINDOW\s*:\s*(?:allow|mode=allow)\b"))
                 {
+                    overlayAllowed = true;
                     score += 3;
-                    indicators.Add("Overlay allowed by AppOps");
+                    indicators.Add("Overlay ALLOWED by AppOps");
                     explanation.Add("Android currently reports overlay AppOps mode as allowed.");
                 }
             }
@@ -147,14 +188,14 @@ public sealed class AdwareService(AdbService adb)
         }
         if (dump.Contains("android.permission.BIND_ACCESSIBILITY_SERVICE", StringComparison.Ordinal))
         {
-            score += 2;
-            indicators.Add("Accessibility service declaration");
+            if (!accessibilityActive) score += 1;
+            indicators.Add("Accessibility service declared");
             explanation.Add("Package metadata references an accessibility service; this does not show whether it is enabled.");
         }
         if (dump.Contains("android.permission.BIND_NOTIFICATION_LISTENER_SERVICE", StringComparison.Ordinal))
         {
-            score += 1;
-            indicators.Add("Notification listener declaration");
+            if (!listenerActive) score += 1;
+            indicators.Add("Notification listener declared");
             explanation.Add("Package metadata references a notification-listener service.");
         }
         if (dump.Contains("android.permission.REQUEST_INSTALL_PACKAGES", StringComparison.Ordinal))
@@ -167,11 +208,57 @@ public sealed class AdwareService(AdbService adb)
         var priority = score >= 5 ? "Elevated review" : score >= 2 ? "Review"
             : score == 1 ? "Weak signal" : "No indicators";
         var combined = string.Join(" · ", indicators);
+        if (package.FirstInstalledUtc is { } installed)
+        {
+            var age = DateTimeOffset.UtcNow - installed;
+            if (age >= TimeSpan.Zero && age <= TimeSpan.FromDays(2))
+            {
+                score += 1;
+                indicators.Add("Installed within 48 hours");
+                explanation.Add("Android reports a recent first-install timestamp; this is not evidence of malware on its own.");
+            }
+        }
+        priority = score >= 6 ? "Elevated review" : score >= 3 ? "Review"
+            : score > 0 ? "Weak signal" : "No indicators";
+        combined = string.Join(" · ", indicators);
         return new AdwareFinding(name, installer, priority, score,
             combined.Length == 0 ? "No checked indicators found" : combined,
             explanation.Count == 0
                 ? "No checked indicators detected. This does not prove the app is safe."
-                : string.Join(" ", explanation));
+                : string.Join(" ", explanation))
+        {
+            AccessibilityEnabled = accessibilityActive,
+            NotificationAccessEnabled = listenerActive,
+            OverlayAllowed = overlayAllowed,
+            EvidenceConfidence = accessibilityActive || listenerActive || overlayAllowed
+                ? "Observed OS setting (not malware proof)"
+                : "Heuristic / declaration only"
+        };
+    }
+
+    private async Task<IReadOnlySet<string>> ReadEnabledPackagesAsync(string serial, string setting)
+    {
+        var results = new HashSet<string>(StringComparer.Ordinal);
+        try
+        {
+            var raw = (await adb.ExecuteAsync(serial, "shell", "settings", "get",
+                "secure", setting)).Trim();
+            if (raw.Equals("null", StringComparison.OrdinalIgnoreCase)) return results;
+            foreach (var component in raw.Split(':', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var slash = component.IndexOf('/');
+                if (slash <= 0) continue;
+                var package = component[..slash].Trim();
+                if (Regex.IsMatch(package, @"^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+$"))
+                    results.Add(package);
+            }
+        }
+        catch
+        {
+            // Some OEMs prohibit secure-setting reads: absence of evidence is
+            // not a definitive claim that a service is disabled.
+        }
+        return results;
     }
 
     /// <summary>
