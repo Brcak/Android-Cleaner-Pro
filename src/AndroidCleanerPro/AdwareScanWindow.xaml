@@ -50,7 +50,6 @@
             <Button x:Name="WatchButton" Style="{StaticResource ToolButton}" Content="Watch Foreground (15s)" Background="#0F766E" Click="Watch_Click"/>
             <Button x:Name="RemoveButton" Style="{StaticResource ToolButton}" Content="Uninstall Selected" Background="#B91C1C" Click="Remove_Click"/>
             <Button x:Name="ExportButton" Style="{StaticResource ToolButton}" Content="Export Findings" Background="#334155" Click="Export_Click"/>
-            <Button x:Name="OpenHazardDbButton" Style="{StaticResource ToolButton}" Content="Hazard DB" Background="#334155" Click="Hazard_Click"/>
             <Button x:Name="HazardButton" Style="{StaticResource ToolButton}" Content="Mark / View Hazard DB" Background="#7C3AED" Click="Hazard_Click"/>
         </WrapPanel>
 
