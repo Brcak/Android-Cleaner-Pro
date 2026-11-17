@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Data;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
@@ -15,6 +16,7 @@ public partial class AdwareScanWindow : Window
     private readonly DeviceInfo _device;
     private readonly AdwareService _scanner;
     private readonly ObservableCollection<AdwareFinding> _findings = new();
+    private ICollectionView? _findingsView;
     private readonly List<ForegroundObservation> _observations = new();
     private CancellationTokenSource? _scanCancel;
     private bool _busy;
@@ -26,8 +28,50 @@ public partial class AdwareScanWindow : Window
         _device = device;
         _scanner = new AdwareService(adb);
         DeviceLabel.Text = $"Connected device: {device.Serial}";
-        FindingsGrid.ItemsSource = _findings;
+        _findingsView = CollectionViewSource.GetDefaultView(_findings);
+        _findingsView.Filter = IsVisibleFinding;
+        FindingsGrid.ItemsSource = _findingsView;
+        _findings.CollectionChanged += (_, _) => RefreshFilterCount();
+        RefreshFilterCount();
         Closing += Window_Closing;
+    }
+
+    private bool IsVisibleFinding(object item)
+    {
+        if (item is not AdwareFinding finding) return false;
+        var priority = (PriorityFilterBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
+        if (!string.IsNullOrEmpty(priority) && priority != "All findings" &&
+            !string.Equals(finding.Priority, priority, StringComparison.Ordinal))
+            return false;
+        var tag = (AgeFilterBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "all";
+        if (tag == "unknown" && finding.FirstInstalledUtc.HasValue) return false;
+        if (int.TryParse(tag, out var days))
+        {
+            if (finding.FirstInstalledUtc is not { } installed) return false;
+            var elapsed = DateTimeOffset.UtcNow - installed;
+            if (elapsed < TimeSpan.Zero || elapsed > TimeSpan.FromDays(days)) return false;
+        }
+        var search = FilterSearchBox?.Text?.Trim();
+        return string.IsNullOrWhiteSpace(search) ||
+            finding.Package.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+            finding.Indicators.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+            finding.Category.Contains(search, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void Filter_Changed(object sender, SelectionChangedEventArgs e) => RefreshFilters();
+    private void Search_Changed(object sender, TextChangedEventArgs e) => RefreshFilters();
+
+    private void RefreshFilters()
+    {
+        _findingsView?.Refresh();
+        RefreshFilterCount();
+    }
+
+    private void RefreshFilterCount()
+    {
+        if (FilteredCountText is null) return;
+        var visible = _findingsView?.Cast<AdwareFinding>().Count() ?? 0;
+        FilteredCountText.Text = $"{visible} visible / {_findings.Count} scanned";
     }
 
     private void Window_Closing(object? sender, CancelEventArgs e) => _scanCancel?.Cancel();
@@ -41,6 +85,7 @@ public partial class AdwareScanWindow : Window
         WatchButton.IsEnabled = !busy;
         RemoveButton.IsEnabled = !busy;
         ExportButton.IsEnabled = !busy;
+        HazardButton.IsEnabled = !busy;
     }
 
     private async void Scan_Click(object sender, RoutedEventArgs e)
@@ -66,6 +111,7 @@ public partial class AdwareScanWindow : Window
             // Recreate the ordered view after all asynchronous progress callbacks have posted.
             _findings.Clear();
             foreach (var finding in sorted) _findings.Add(finding);
+            RefreshFilters();
             var elevated = sorted.Count(x => x.Priority == "Elevated review");
             var review = sorted.Count(x => x.Priority == "Review");
             var incomplete = sorted.Count(x => x.Priority == "Incomplete");
@@ -106,6 +152,8 @@ public partial class AdwareScanWindow : Window
         SelectedPackage.Text = finding?.Package ?? "Choose a package to review its evidence";
         SelectedInstaller.Text = finding?.Installer ?? "—";
         SelectedExplanation.Text = finding?.Explanation ?? "No package selected.";
+        SelectedConfidence.Text = finding?.EvidenceConfidence ?? "—";
+        SelectedInstallDate.Text = finding?.InstalledLabel ?? "—";
     }
 
     private async void Capture_Click(object sender, RoutedEventArgs e)
@@ -251,6 +299,13 @@ public partial class AdwareScanWindow : Window
                 deviceSerial = _device.Serial,
                 scanComplete = ScanProgress.Value >= 100,
                 findings = _findings.ToArray(),
+                filter = new
+                {
+                    age = (AgeFilterBox.SelectedItem as ComboBoxItem)?.Content?.ToString(),
+                    priority = (PriorityFilterBox.SelectedItem as ComboBoxItem)?.Content?.ToString(),
+                    search = FilterSearchBox.Text
+                },
+                evidenceNote = "Vendor groupings and install dates are clues; enabled services and AppOps are OS-reported, not a malware verdict.",
                 foregroundObservations = _observations.ToArray(),
                 disclaimer = "Review indicators only. Foreground window and permission status do not prove adware."
             };
