@@ -20,7 +20,9 @@ The main window now includes a conventional **File / Device / Tools / Help** men
 - **Connection Recovery**: read-only troubleshooting for ADB unauthorized/offline/recovery/sideload and Fastboot, safe ADB-server restart, and Safe Mode guidance for malware-blocked phones ([guide](docs/CONNECTION_RECOVERY.md)). Does not force authorization or bypass debugging security.
 - Phone manufacturer/model, Android version, battery and storage data (when available over ADB)
 - App inventory with system/user, Google, Samsung, Motorola, T-Mobile, Banking/Finance and familiar-vendor categories, plus package search and installation-age filters (1/2/7/30 days) ([guide](docs/APP_INVENTORY_FILTERS.md)). Category labels are not verification or malware verdicts.
-- **Adware & Suspicious Apps** investigation: overlay permission/AppOps signals, unusual installation sources, adware-related keywords, foreground popup-window capture and short observation, cancellation, and report export ([guide](docs/ADWARE_REVIEW.md))
+- **Security Scanner 2.0**: correlates Android-enabled accessibility services and notification listeners, overlay AppOps, declared permissions, and install timestamps; includes recent-install / review-priority / search filters. Findings require technician interpretation ([guide](docs/SECURITY_SCANNER_2.md)).
+- **Android Log Viewer**: read-only 500-line Logcat snapshots with error/warning and text filters; optional privacy-aware export.
+- **Repair Job Records**: local SQLite ticket history with before/after diagnosis notes and printable HTML customer reports (browser Print → Save as PDF).
 - **Hazard App Database**: a private local SQLite log of technician hazard/review markings and success/failure records for app removals performed in the tool, with JSON export ([guide](docs/HAZARD_DATABASE.md)).
 - Single-package uninstall with explicit technician confirmation
 - Recovery reboot with confirmation; manual Safe Mode guidance
@@ -28,7 +30,7 @@ The main window now includes a conventional **File / Device / Tools / Help** men
 - **FRP Recovery Assistant**: owner-verification checklist and official Google/Samsung/Motorola/Pixel account-recovery instructions; works without ADB, never bypasses FRP ([guide](docs/FRP_RECOVERY.md)).
 - JSON reports
 
-App icons are not yet implemented. Adware indicators and foreground observations are not proof of malware or proof of which app generated an advertisement. The tool is experimental, not an antivirus product. Package-name flags do not establish malware, and uninstalling can erase app data. Use only with the device owner's permission. Reports contain device identifiers.
+The application has a custom mascot icon; installed Android app icons in the inventory are not yet implemented. Adware indicators and foreground observations are not proof of malware or proof of which app generated an advertisement. The tool is experimental, not an antivirus product. Package-name flags do not establish malware, and uninstalling can erase app data. Use only with the device owner's permission. Some reports and logcat snapshots may contain customer data. Review before sharing.
 
 ## Developers
 Install the .NET 10 SDK on Windows and run `./build-dotnet-windows.ps1`. CI builds and Inno Setup releases use [Windows .NET Build](https://github.com/Brcak/Android-Cleaner-Pro/actions/workflows/windows-dotnet.yml).
