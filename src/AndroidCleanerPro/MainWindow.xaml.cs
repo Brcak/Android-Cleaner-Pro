@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<PackageInfo> _packages = new();
     private ICollectionView? _packageView;
     private bool _busy;
-    private enum NavigationPage { Dashboard, Inventory, Security, Reports }
+    private enum NavigationPage { Dashboard, Inventory, Security, Reports, Advanced }
     private NavigationPage _currentPage = NavigationPage.Dashboard;
 
     public MainWindow()
@@ -47,9 +47,12 @@ public partial class MainWindow : Window
         var inventory = page == NavigationPage.Inventory;
 
         ConnectedDevicesPanel.Visibility = dashboard ? Visibility.Visible : Visibility.Collapsed;
-        MainActionsPanel.Visibility = dashboard || inventory ? Visibility.Visible : Visibility.Collapsed;
-        InventoryFiltersPanel.Visibility = dashboard || inventory ? Visibility.Visible : Visibility.Collapsed;
-        PackagesGrid.Visibility = dashboard || inventory ? Visibility.Visible : Visibility.Collapsed;
+        QuickStartPanel.Visibility = dashboard ? Visibility.Visible : Visibility.Collapsed;
+        MainActionsPanel.Visibility = inventory ? Visibility.Visible : Visibility.Collapsed;
+        InventoryFiltersPanel.Visibility = inventory ? Visibility.Visible : Visibility.Collapsed;
+        PackagesGrid.Visibility = inventory ? Visibility.Visible : Visibility.Collapsed;
+        AdvancedToolsPanel.Visibility = page == NavigationPage.Advanced
+            ? Visibility.Visible : Visibility.Collapsed;
         SecurityReviewPanel.Visibility = page == NavigationPage.Security
             ? Visibility.Visible : Visibility.Collapsed;
         ReportsPanel.Visibility = page == NavigationPage.Reports
@@ -57,14 +60,16 @@ public partial class MainWindow : Window
 
         (PageTitle.Text, PageSubtitle.Text) = page switch
         {
-            NavigationPage.Dashboard => ("Device Dashboard",
-                "Connect an authorized Android phone and access diagnostic tools."),
-            NavigationPage.Inventory => ("App Inventory",
-                "Scan apps, review installation dates and filter by vendor or type."),
-            NavigationPage.Security => ("Security Review",
-                "Investigate popups, overlays and suspicious app behavior."),
-            NavigationPage.Reports => ("JSON Reports",
-                "Export the currently filtered installed-app inventory."),
+            NavigationPage.Dashboard => ("Welcome to Android Cleaner Pro",
+                "Connect, scan, review, and document repairs in a few simple steps."),
+            NavigationPage.Inventory => ("Installed Apps",
+                "Select an app to inspect, review, or remove it after owner approval."),
+            NavigationPage.Security => ("Security Scan",
+                "Investigate popups and suspicious activity before taking action."),
+            NavigationPage.Reports => ("Repair Reports",
+                "Create customer-ready repair notes or export the app list."),
+            NavigationPage.Advanced => ("Advanced Tools",
+                "Specialist diagnostics, firmware and ADB controls."),
             _ => ("Android Cleaner Pro", "Technician tools")
         };
 
@@ -72,6 +77,7 @@ public partial class MainWindow : Window
         HighlightSidebarButton(InventoryNavButton, inventory);
         HighlightSidebarButton(SecurityNavButton, page == NavigationPage.Security);
         HighlightSidebarButton(ReportsNavButton, page == NavigationPage.Reports);
+        HighlightSidebarButton(AdvancedNavButton, page == NavigationPage.Advanced);
         UpdateInventoryCount();
     }
 
@@ -104,6 +110,9 @@ public partial class MainWindow : Window
 
     private void ReportsNav_Click(object sender, RoutedEventArgs e)
         => NavigateTo(NavigationPage.Reports);
+
+    private void AdvancedNav_Click(object sender, RoutedEventArgs e)
+        => NavigateTo(NavigationPage.Advanced);
 
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
@@ -219,8 +228,11 @@ public partial class MainWindow : Window
         var previous = SelectedDevice?.Serial;
         var devices = await _adb.GetDevicesAsync();
         var named = devices.Select(d => d with { Description = string.IsNullOrWhiteSpace(d.Description) ? d.Serial + " (" + d.State + ")" : d.Serial + " (" + d.State + ") • " + d.Description }).ToArray();
+        // Avoid resetting the selection (and discarding the loaded inventory)
+        // on every Refresh when the same phone is still connected.
+        var chosen = named.FirstOrDefault(x => x.Serial == previous) ?? named.FirstOrDefault();
         DeviceSelector.ItemsSource = named;
-        DeviceSelector.SelectedItem = named.FirstOrDefault(x => x.Serial == previous) ?? named.FirstOrDefault();
+        DeviceSelector.SelectedItem = chosen;
         if (SelectedDevice is { State: "device" } connected)
         {
             try { await LoadPhoneInfoAsync(connected); }
@@ -290,9 +302,14 @@ public partial class MainWindow : Window
         var level = System.Text.RegularExpressions.Regex.Match(battery, @"(?m)^\s*level:\s*(\d+)");
         PhoneInfoText.Text = $"{brand} {model} • Android {version} (API {sdk}) • Battery: {(level.Success ? level.Groups[1].Value + "%" : "Unavailable")}\nBuild: {build}";
     }
+    private string? _inventoryDeviceSerial;
     private async void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _packages.Clear();
+        if (SelectedDevice?.Serial != _inventoryDeviceSerial)
+        {
+            _packages.Clear();
+            _inventoryDeviceSerial = SelectedDevice?.Serial;
+        }
         if (SelectedDevice is not { } device) { DeviceDetails.Text = "No device selected"; PhoneInfoText.Text = ""; return; }
         DeviceDetails.Text = $"Serial: {device.Serial} • Status: {device.State}";
         if (device.State != "device") { PhoneInfoText.Text = "Unlock phone and approve USB debugging."; return; }
@@ -407,6 +424,7 @@ public partial class MainWindow : Window
         _packages.Clear();
         foreach (var package in result.Packages) _packages.Add(package);
         ApplyInventoryFilters();
+        _inventoryDeviceSerial = device.Serial;
         StatusText.Text = $"Scanned {result.Packages.Count} Android apps. {result.DateStatus} " +
                           "Vendor/finance categories are name-based clues, not trusted-app verdicts.";
     });
