@@ -231,8 +231,27 @@ public partial class MainWindow : Window
         // Avoid resetting the selection (and discarding the loaded inventory)
         // on every Refresh when the same phone is still connected.
         var chosen = named.FirstOrDefault(x => x.Serial == previous) ?? named.FirstOrDefault();
-        DeviceSelector.ItemsSource = named;
-        DeviceSelector.SelectedItem = chosen;
+        // ItemsSource temporarily changes SelectedItem to null; suppress that
+        // transient event or the previous scan disappears on every refresh.
+        _refreshingDeviceList = true;
+        try
+        {
+            DeviceSelector.ItemsSource = named;
+            DeviceSelector.SelectedItem = chosen;
+        }
+        finally { _refreshingDeviceList = false; }
+        if (chosen?.Serial != _inventoryDeviceSerial)
+        {
+            _packages.Clear();
+            _inventoryDeviceSerial = chosen?.Serial;
+        }
+        DeviceDetails.Text = chosen is null
+            ? "No phone connected"
+            : $"Connected: {chosen.Serial} • {chosen.State}";
+        if (chosen is not { State: "device" })
+            PhoneInfoText.Text = chosen is null
+                ? "Connect the phone using a USB data cable."
+                : "Phone detected but USB debugging authorization is not ready. Open Connection Help.";
         if (SelectedDevice is { State: "device" } connected)
         {
             try { await LoadPhoneInfoAsync(connected); }
@@ -303,8 +322,10 @@ public partial class MainWindow : Window
         PhoneInfoText.Text = $"{brand} {model} • Android {version} (API {sdk}) • Battery: {(level.Success ? level.Groups[1].Value + "%" : "Unavailable")}\nBuild: {build}";
     }
     private string? _inventoryDeviceSerial;
+    private bool _refreshingDeviceList;
     private async void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_refreshingDeviceList) return;
         if (SelectedDevice?.Serial != _inventoryDeviceSerial)
         {
             _packages.Clear();
